@@ -117,6 +117,15 @@ export const Header: React.FC<HeaderProps> = ({
         ? 'py-2 bg-white/95 dark:bg-gray-900/95 shadow-md backdrop-blur-md' 
         : 'py-6 bg-white dark:bg-gray-900';
 
+    const handleUserIconClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (isLoggedIn) {
+            setIsProfileMenuOpen(!isProfileMenuOpen);
+        } else {
+            onNavigateToLogin();
+        }
+    };
+
     return (
         <header className={`sticky top-0 z-40 transition-all duration-500 ease-in-out border-b border-gray-100 dark:border-gray-800 ${headerClass}`}>
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -140,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 )}
                             </button>
                             <div className="relative">
-                                <button onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} className="p-2 text-gray-800 dark:text-white hover:text-rose-600 transition-colors">
+                                <button onClick={handleUserIconClick} className="p-2 text-gray-800 dark:text-white hover:text-rose-600 transition-colors">
                                     <UserIcon className="w-6 h-6" />
                                 </button>
                                 {isLoggedIn && isProfileMenuOpen && (
@@ -208,8 +217,8 @@ export const Header: React.FC<HeaderProps> = ({
 
                         <div className="relative">
                             <button 
-                                onMouseEnter={() => setIsProfileMenuOpen(true)} 
-                                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} 
+                                onMouseEnter={() => isLoggedIn && setIsProfileMenuOpen(true)} 
+                                onClick={handleUserIconClick} 
                                 className="group p-3 flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 transition-all hover:-translate-y-0.5"
                             >
                                 <UserIcon className="w-6 h-6" />
