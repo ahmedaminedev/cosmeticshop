@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { Product } from '../types';
-import { ShoppingBagIcon, EyeIcon, HeartIcon } from './IconComponents';
+import { ShoppingBagIcon, EyeIcon, HeartIcon, StarIcon } from './IconComponents';
 import { useCart } from './CartContext';
 import { useFavorites } from './FavoritesContext';
 import { useToast } from './ToastContext';
@@ -16,18 +16,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, on
     const { addToCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
     const { addToast } = useToast();
+    const [isHovered, setIsHovered] = useState(false);
     
     const isOutOfStock = product.quantity === 0;
     const isFav = isFavorite(product.id as number);
 
-    const displayImage = (product.images && product.images.length > 0) ? product.images[0] : product.imageUrl;
+    // Gestion de l'image (si une 2ème image existe, on l'affiche au survol pour un effet premium)
+    const firstImage = (product.images && product.images.length > 0) ? product.images[0] : product.imageUrl;
+    const secondImage = (product.images && product.images.length > 1) ? product.images[1] : firstImage;
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
         if (isOutOfStock) return;
         addToCart(product);
-        addToast("Ajouté au sac", "success");
+        addToast("Ajouté au sac avec succès", "success");
     };
     
     const handlePreview = (e: React.MouseEvent) => {
@@ -48,85 +51,112 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, on
     };
 
     const discountPercentage = product.discount || (product.oldPrice && product.price ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100) : 0);
-    const isNew = product.name.toLowerCase().includes('nouveau') || (!product.discount && !product.oldPrice && Math.random() > 0.7);
+    const isNew = product.name.toLowerCase().includes('nouveau') || (!product.discount && !product.oldPrice && Math.random() > 0.8);
 
     return (
-        <div className="group relative w-full bg-white dark:bg-gray-800 rounded-[1.5rem] shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_30px_-5px_rgba(0,0,0,0.1)] transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col h-full hover:-translate-y-1">
+        <div 
+            className="group relative w-full h-full flex flex-col bg-white dark:bg-gray-900 rounded-[1.5rem] transition-all duration-500 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] border border-transparent hover:border-rose-100 dark:hover:border-gray-700 overflow-hidden"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             
-            {/* Zone Image */}
-            <div className="relative aspect-[4/5] overflow-hidden bg-gray-50 dark:bg-gray-900 rounded-t-[1.5rem]">
-                <a href="#" onClick={handleProductClick} className="block w-full h-full p-4">
+            {/* Zone Image - Aspect Ratio Portrait (Luxe standard) */}
+            <div className="relative aspect-[3/4] overflow-hidden bg-[#F9F9F9] dark:bg-gray-800 rounded-t-[1.5rem]">
+                <a href="#" onClick={handleProductClick} className="block w-full h-full relative">
+                    {/* Image Principale */}
                     <img 
-                        src={displayImage} 
+                        src={firstImage} 
                         alt={product.name} 
                         loading="lazy"
-                        className={`w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transition-transform duration-700 ease-out group-hover:scale-105 ${isOutOfStock ? 'opacity-50 grayscale' : ''}`}
+                        className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-700 ease-in-out ${isHovered && firstImage !== secondImage ? 'opacity-0 scale-105' : 'opacity-100 scale-100 group-hover:scale-110'} ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
                     />
+                    
+                    {/* Seconde Image au survol (si existe) */}
+                    {firstImage !== secondImage && (
+                        <img 
+                            src={secondImage} 
+                            alt={`${product.name} view 2`} 
+                            loading="lazy"
+                            className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-700 ease-in-out ${isHovered ? 'opacity-100 scale-110' : 'opacity-0 scale-100'}`}
+                        />
+                    )}
                 </a>
 
-                {/* Badges */}
-                <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 items-start">
+                {/* Badges Élégants */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2 z-20">
                     {discountPercentage > 0 && (
-                        <span className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                        <span className="bg-rose-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
                             -{discountPercentage}%
                         </span>
                     )}
                     {isNew && (
-                        <span className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                        <span className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm border border-gray-100 dark:border-gray-700">
                             Nouveau
                         </span>
                     )}
                 </div>
 
-                {/* Bouton Favoris */}
+                {/* Bouton Favoris Flottant */}
                 <button 
                     onClick={handleToggleFavorite}
-                    className={`absolute top-3 right-3 p-2 rounded-full transition-all z-20 hover:scale-110 ${isFav ? 'text-rose-500 bg-white/80 shadow-sm' : 'text-gray-400 hover:text-rose-500'}`}
-                    aria-label="Favoris"
+                    className={`absolute top-4 right-4 p-2.5 rounded-full transition-all duration-300 z-20 shadow-sm ${isFav ? 'bg-rose-50 text-rose-500' : 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md text-gray-400 hover:text-rose-500 hover:bg-white'}`}
+                    title="Ajouter aux favoris"
                 >
-                    <HeartIcon className="w-4 h-4" solid={isFav} />
+                    <HeartIcon className={`w-4 h-4 transition-transform ${isFav ? 'scale-110' : 'group-hover:scale-110'}`} solid={isFav} />
                 </button>
 
-                {/* Action Bar (Hover Desktop / Always visible Mobile if desired, but here stick to hover for clean look) */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
-                    <button 
-                        onClick={handleAddToCart}
-                        disabled={isOutOfStock}
-                        className="w-full bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl shadow-lg border border-gray-100 dark:border-gray-600 hover:bg-gray-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <ShoppingBagIcon className="w-4 h-4" />
-                        {isOutOfStock ? 'Rupture' : 'Ajouter au sac'}
-                    </button>
+                {/* Action Bar (Glassmorphism Slide-up) */}
+                <div className={`absolute bottom-4 left-4 right-4 z-20 transition-all duration-500 ease-out transform ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={handleAddToCart}
+                            disabled={isOutOfStock}
+                            className="flex-1 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md text-gray-900 dark:text-white font-bold text-[10px] uppercase tracking-widest py-3.5 rounded-full shadow-lg border border-white/20 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                            <ShoppingBagIcon className="w-4 h-4" />
+                            {isOutOfStock ? 'Épuisé' : 'Ajouter'}
+                        </button>
+                        <button 
+                            onClick={handlePreview}
+                            className="w-10 h-10 flex items-center justify-center bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-full shadow-lg border border-white/20 text-gray-600 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                            title="Aperçu rapide"
+                        >
+                            <EyeIcon className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* Info */}
-            <div className="p-4 flex flex-col flex-grow text-left">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-                    {product.brand}
-                </p>
+            {/* Info Produit */}
+            <div className="p-5 flex flex-col flex-grow text-center relative z-10">
+                <a href="#" onClick={(e) => { e.preventDefault(); }} className="inline-block mx-auto mb-2">
+                    <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] hover:text-rose-500 transition-colors">
+                        {product.brand}
+                    </p>
+                </a>
                 
-                <h3 className="text-sm font-serif font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 min-h-[2.5em] leading-snug">
-                    <a href="#" onClick={handleProductClick} className="hover:text-rose-600 transition-colors">
+                <h3 className="text-base font-serif font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 leading-tight group-hover:text-rose-600 transition-colors duration-300">
+                    <a href="#" onClick={handleProductClick}>
                         {product.name}
                     </a>
                 </h3>
 
-                <div className="mt-auto flex items-center justify-between">
-                    <div className="flex flex-col">
-                        <span className="text-base font-bold text-gray-900 dark:text-white">
-                            {product.price.toFixed(3)} DT
+                {/* Rating fictif pour l'esthétique */}
+                <div className="flex justify-center items-center gap-1 mb-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                    {[1,2,3,4,5].map(i => (
+                        <StarIcon key={i} className="w-3 h-3 text-gold-400 fill-current" />
+                    ))}
+                </div>
+
+                <div className="mt-auto flex items-center justify-center gap-3">
+                    {product.oldPrice && (
+                        <span className="text-sm text-gray-400 line-through font-light decoration-rose-300">
+                            {product.oldPrice.toFixed(3)}
                         </span>
-                        {product.oldPrice && (
-                            <span className="text-xs text-gray-400 line-through">
-                                {product.oldPrice.toFixed(3)} DT
-                            </span>
-                        )}
-                    </div>
-                    {/* Quick Eye for preview */}
-                    <button onClick={handlePreview} className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors lg:hidden">
-                        <EyeIcon className="w-5 h-5"/>
-                    </button>
+                    )}
+                    <span className="text-lg font-serif font-bold text-gray-900 dark:text-white">
+                        {product.price.toFixed(3)} <span className="text-xs font-sans font-light text-gray-500">TND</span>
+                    </span>
                 </div>
             </div>
         </div>
