@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import type { Product } from '../types';
+import type { Product, OffersPageConfig } from '../types';
 import { Breadcrumb } from './Breadcrumb';
 import { ProductCard } from './ProductCard';
-import { Squares2X2Icon, Bars3Icon, ChevronDownIcon, ShoppingBagIcon, SparklesIcon, ClockIcon, ArrowUpRightIcon } from './IconComponents';
+import { Squares2X2Icon, Bars3Icon, ChevronDownIcon, ShoppingBagIcon, SparklesIcon, ClockIcon } from './IconComponents';
 import { ProductListItem } from './ProductListItem';
 import { useCart } from './CartContext';
+import { api } from '../utils/api';
 
 interface PromotionsPageProps {
     onNavigateHome: () => void;
@@ -64,7 +65,8 @@ const CountdownTimer: React.FC = () => {
 };
 
 // --- NOUVEAU BLOC 1 : GLOW ROUTINE (Split Screen) ---
-const GlowRoutinePromo: React.FC = () => {
+export const GlowRoutinePromo: React.FC<{ config?: OffersPageConfig['glowRoutine'] }> = ({ config }) => {
+    if (!config) return null;
     return (
         <section className="relative w-full max-w-screen-2xl mx-auto my-12 overflow-hidden bg-white dark:bg-gray-900 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-800">
             <div className="flex flex-col lg:flex-row h-auto lg:h-[600px]">
@@ -76,7 +78,7 @@ const GlowRoutinePromo: React.FC = () => {
                     
                     {/* Simulated Product Composition Image */}
                     <img 
-                        src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop" 
+                        src={config.image}
                         alt="Glow Routine Products"
                         className="relative z-10 w-full max-w-md object-contain drop-shadow-2xl transform transition-transform duration-700 hover:scale-105"
                     />
@@ -84,16 +86,25 @@ const GlowRoutinePromo: React.FC = () => {
 
                 {/* Content Side (Right) - Text Centered */}
                 <div className="w-full lg:w-1/2 flex flex-col justify-center items-center text-center p-12 lg:p-20 order-1 lg:order-2 bg-white dark:bg-gray-900">
-                    <span className="text-sm font-sans tracking-[0.2em] text-gray-500 uppercase mb-4">
-                        Your 3-Step Corrective
+                    <span 
+                        className="text-sm font-sans tracking-[0.2em] uppercase mb-4"
+                        style={{ color: config.subtitleColor }}
+                        dangerouslySetInnerHTML={{ __html: config.subtitle }}
+                    >
                     </span>
                     
-                    <h2 className="text-5xl lg:text-7xl font-serif font-bold text-gray-900 dark:text-white mb-8 leading-tight">
-                        GLOW ROUTINE
+                    <h2 
+                        className="text-5xl lg:text-7xl font-serif font-bold mb-8 leading-tight"
+                        style={{ color: config.titleColor }}
+                        dangerouslySetInnerHTML={{ __html: config.title }}
+                    >
                     </h2>
                     
-                    <button className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-10 py-4 rounded-full font-bold text-xs uppercase tracking-[0.2em] hover:bg-rose-600 dark:hover:bg-rose-400 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                        Shop Now
+                    <button 
+                        className="px-10 py-4 rounded-full font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                        style={{ backgroundColor: config.buttonColor, color: config.buttonTextColor }}
+                    >
+                        {config.buttonText}
                     </button>
                 </div>
             </div>
@@ -102,21 +113,31 @@ const GlowRoutinePromo: React.FC = () => {
 };
 
 // --- NOUVEAU BLOC 2 : ESSENTIALS BANNER (Horizontal) ---
-const EssentialsBanner: React.FC = () => {
+export const EssentialsBanner: React.FC<{ config?: OffersPageConfig['essentials'] }> = ({ config }) => {
+    if (!config) return null;
     return (
         <section className="relative w-full max-w-screen-2xl mx-auto my-12 overflow-hidden bg-[#F8F9FA] dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700">
             <div className="flex flex-col md:flex-row items-center justify-between relative min-h-[400px]">
                 
                 {/* Left Content */}
                 <div className="w-full md:w-5/12 p-10 md:pl-20 md:py-20 z-10 text-center md:text-left">
-                    <h2 className="text-4xl md:text-5xl font-sans font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
-                        NEW TO IT?
+                    <h2 
+                        className="text-4xl md:text-5xl font-sans font-bold mb-4 tracking-tight"
+                        style={{ color: config.titleColor }}
+                        dangerouslySetInnerHTML={{ __html: config.title }}
+                    >
                     </h2>
-                    <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 font-medium mb-10">
-                        Here are the essentials you need.
+                    <p 
+                        className="text-lg md:text-xl font-medium mb-10"
+                        style={{ color: config.subtitleColor }}
+                        dangerouslySetInnerHTML={{ __html: config.subtitle }}
+                    >
                     </p>
-                    <button className="bg-black dark:bg-white text-white dark:text-black px-12 py-4 rounded-full font-bold text-xs uppercase tracking-[0.2em] hover:bg-rose-600 dark:hover:bg-rose-400 transition-all shadow-lg">
-                        Start Here
+                    <button 
+                        className="px-12 py-4 rounded-full font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg"
+                        style={{ backgroundColor: config.buttonColor, color: config.buttonTextColor }}
+                    >
+                        {config.buttonText}
                     </button>
                 </div>
 
@@ -137,7 +158,7 @@ const EssentialsBanner: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-[#F8F9FA] via-transparent to-transparent dark:from-gray-800 z-10 w-1/3"></div>
                     
                     <img 
-                        src="https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=1000&auto=format&fit=crop" 
+                        src={config.image} 
                         alt="Model applying makeup" 
                         className="w-full h-full object-cover object-top md:object-center"
                     />
@@ -154,7 +175,7 @@ const EssentialsBanner: React.FC = () => {
     );
 };
 
-const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) => void; onNavigateToProductDetail: (productId: number) => void; }> = ({ product, onPreview, onNavigateToProductDetail }) => {
+export const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) => void; onNavigateToProductDetail: (productId: number) => void; titleColor?: string; subtitleColor?: string; }> = ({ product, onPreview, onNavigateToProductDetail, titleColor, subtitleColor }) => {
     const { addToCart, openCart } = useCart();
     
     const handleAddToCart = () => {
@@ -198,11 +219,17 @@ const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) =
                         Offre Flash
                     </div>
                     
-                    <h3 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium text-gray-900 dark:text-white mb-6 leading-tight">
+                    <h3 
+                        className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium mb-6 leading-tight"
+                        style={{ color: titleColor }}
+                    >
                         {product.name}
                     </h3>
                     
-                    <p className="text-lg text-gray-600 dark:text-gray-300 mb-10 font-light leading-relaxed max-w-lg mx-auto lg:mx-0">
+                    <p 
+                        className="text-lg mb-10 font-light leading-relaxed max-w-lg mx-auto lg:mx-0"
+                        style={{ color: subtitleColor }}
+                    >
                         {product.description || "Profitez de cette offre exclusive pour une durée limitée. L'excellence à prix privilégié."}
                     </p>
                     
@@ -241,17 +268,32 @@ const DealOfTheDay: React.FC<{ product: Product; onPreview: (product: Product) =
 
 
 export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, onPreview, products: allProducts, onNavigateToProductDetail }) => {
-    const promotionProducts = useMemo(() => allProducts.filter(p => p.promo || p.discount), [allProducts]);
+    const [offersConfig, setOffersConfig] = useState<OffersPageConfig | null>(null);
     const [sortOrder, setSortOrder] = useState('discount-desc');
     const [viewMode, setViewMode] = useState('grid');
     
     useEffect(() => {
         document.title = `Offres & Privilèges - Cosmetics Shop`;
+        
+        // Load configuration from API
+        api.getOffersConfig().then(setOffersConfig).catch(console.error);
     }, []);
 
     const displayedProducts = useMemo(() => {
-        const sorted = [...promotionProducts];
-        
+        if (!offersConfig) return [];
+
+        let baseList: Product[] = [];
+
+        // Manual Selection or Automatic
+        if (offersConfig.allOffersGrid?.useManualSelection) {
+            baseList = allProducts.filter(p => offersConfig.allOffersGrid.manualProductIds?.includes(p.id));
+        } else {
+            // Default behavior: products with promo or discount
+            baseList = allProducts.filter(p => p.promo || p.discount);
+        }
+
+        // Sorting
+        const sorted = [...baseList];
         sorted.sort((a, b) => {
             switch (sortOrder) {
                 case 'price-asc': return a.price - b.price;
@@ -261,8 +303,11 @@ export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, 
             }
         });
         
-        return sorted;
-    }, [promotionProducts, sortOrder]);
+        // Limiting (Apply limit if configured)
+        const limit = offersConfig.allOffersGrid?.limit || 12;
+        return sorted.slice(0, limit);
+
+    }, [allProducts, sortOrder, offersConfig]);
 
     const gridClasses = useMemo(() => {
         switch (viewMode) {
@@ -273,40 +318,63 @@ export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, 
     }, [viewMode]);
 
     const dealOfTheDayProduct = useMemo(() => {
-        return [...promotionProducts].sort((a, b) => (b.discount || 0) - (a.discount || 0))[0] || allProducts[0];
-    }, [promotionProducts, allProducts]);
+        if (offersConfig && offersConfig.dealOfTheDay && offersConfig.dealOfTheDay.productId) {
+            const product = allProducts.find(p => p.id === offersConfig.dealOfTheDay.productId);
+            if (product) return product;
+        }
+        // Fallback
+        return [...allProducts].sort((a, b) => (b.discount || 0) - (a.discount || 0))[0] || allProducts[0];
+    }, [allProducts, offersConfig]);
+
+    if (!offersConfig) return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
 
     return (
         <div className="bg-[#FAFAFA] dark:bg-gray-950 min-h-screen">
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
                 <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: 'Offres & Privilèges' }]} />
                 
-                {/* Header Section */}
+                {/* Header Section - Configured */}
                 <div className="text-center max-w-3xl mx-auto mt-12 mb-16">
                     <span className="text-rose-500 font-bold uppercase tracking-[0.25em] text-xs mb-3 block">Sélection Exclusive</span>
-                    <h1 className="text-4xl md:text-6xl font-serif text-gray-900 dark:text-white mb-6">
-                        Offres & <span className="italic text-rose-500">Privilèges</span>
+                    <h1 
+                        className="text-4xl md:text-6xl font-serif mb-6"
+                        style={{ color: offersConfig.header.titleColor }}
+                        dangerouslySetInnerHTML={{ __html: offersConfig.header.title }}
+                    >
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400 font-light text-lg leading-relaxed">
-                        Découvrez notre sélection de produits de luxe à des prix exceptionnels. 
-                        L'occasion parfaite pour renouveler vos essentiels ou craquer pour une nouveauté.
+                    <p 
+                        className="font-light text-lg leading-relaxed"
+                        style={{ color: offersConfig.header.subtitleColor }}
+                        dangerouslySetInnerHTML={{ __html: offersConfig.header.subtitle }}
+                    >
                     </p>
                 </div>
 
-                {/* --- NOUVEAUX BLOCS PROMO --- */}
+                {/* --- BLOCS PROMO CONFIGURABLES --- */}
                 <div className="space-y-8 mb-20">
-                    <GlowRoutinePromo />
-                    <EssentialsBanner />
+                    <GlowRoutinePromo config={offersConfig.glowRoutine} />
+                    <EssentialsBanner config={offersConfig.essentials} />
                 </div>
 
-                <DealOfTheDay product={dealOfTheDayProduct} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
+                <DealOfTheDay 
+                    product={dealOfTheDayProduct} 
+                    onPreview={onPreview} 
+                    onNavigateToProductDetail={onNavigateToProductDetail}
+                    titleColor={offersConfig.dealOfTheDay.titleColor}
+                    subtitleColor={offersConfig.dealOfTheDay.subtitleColor}
+                />
 
                 <main>
                     {/* Toolbar */}
                     <div className="sticky top-20 z-20 bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md py-4 mb-8 border-b border-gray-200 dark:border-gray-800 transition-all">
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                             <div className="flex items-baseline gap-2">
-                                <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">Toutes les offres</h2>
+                                <h2 
+                                    className="text-xl font-serif font-bold"
+                                    style={{ color: offersConfig.allOffersGrid?.titleColor }}
+                                    dangerouslySetInnerHTML={{ __html: offersConfig.allOffersGrid?.title || "Toutes les offres" }}
+                                >
+                                </h2>
                                 <span className="text-sm text-gray-500 font-light">({displayedProducts.length} trésors trouvés)</span>
                             </div>
 

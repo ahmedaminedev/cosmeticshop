@@ -136,6 +136,29 @@ const withMockFallback = async <T>(apiCall: () => Promise<T>, mockData: T): Prom
     }
 };
 
+// Default Offers Config for fallback
+const defaultOffersConfig = {
+    header: {
+        title: "Offres & Privilèges",
+        subtitle: "Découvrez notre sélection de produits de luxe à des prix exceptionnels."
+    },
+    glowRoutine: {
+        title: "GLOW ROUTINE",
+        subtitle: "Your 3-Step Corrective",
+        buttonText: "Shop Now",
+        image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop"
+    },
+    essentials: {
+        title: "NEW TO IT?",
+        subtitle: "Here are the essentials you need.",
+        buttonText: "Start Here",
+        image: "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=1000&auto=format&fit=crop"
+    },
+    dealOfTheDay: {
+        productId: 1
+    }
+};
+
 export const api = {
     // Auth
     login: (credentials: any) => apiRequest('/auth/login', 'POST', credentials),
@@ -168,6 +191,10 @@ export const api = {
 
     // Advertisements
     getAdvertisements: () => withMockFallback(() => apiRequest('/advertisements'), initialAdvertisements),
+
+    // Offers Config
+    getOffersConfig: () => withMockFallback(() => apiRequest('/offers-config'), defaultOffersConfig),
+    updateOffersConfig: (config: any) => apiRequest('/offers-config', 'POST', config),
 
     // Orders
     createOrder: (order: any) => apiRequest('/orders', 'POST', order),

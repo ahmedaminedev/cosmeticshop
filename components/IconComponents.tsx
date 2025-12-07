@@ -428,3 +428,9 @@ export const StorefrontIcon: React.FC<{ className?: string }> = ({ className }) 
         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h4.018a1.5 1.5 0 001.5-1.5V9.375c0-.621-.504-1.125-1.125-1.125H3.562A1.125 1.125 0 002.438 9.375V19.5a1.5 1.5 0 001.5 1.5h2.812M18.75 21v-7.5a2.25 2.25 0 00-2.25-2.25h-9a2.25 2.25 0 00-2.25 2.25V21m4.5 0v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21M6.75 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21M3.75 21V9.375a1.125 1.125 0 011.125-1.125H9.75v-3l-1.5-3L7.125 3H3.375a1.125 1.125 0 00-1.125 1.125V9.375" />
     </svg>
 );
+
+export const ArrowsPointingOutIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+    </svg>
+);

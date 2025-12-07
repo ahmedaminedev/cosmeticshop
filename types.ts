@@ -257,6 +257,47 @@ export interface Advertisements {
   shoppableVideos: ShoppableVideo[]; // Nouveau champ
 }
 
+export interface OffersPageConfig {
+    header: {
+        title: string;
+        titleColor?: string;
+        subtitle: string;
+        subtitleColor?: string;
+    };
+    glowRoutine: {
+        title: string;
+        titleColor?: string;
+        subtitle: string;
+        subtitleColor?: string;
+        buttonText: string;
+        buttonColor?: string;
+        buttonTextColor?: string;
+        image: string;
+    };
+    essentials: {
+        title: string;
+        titleColor?: string;
+        subtitle: string;
+        subtitleColor?: string;
+        buttonText: string;
+        buttonColor?: string;
+        buttonTextColor?: string;
+        image: string;
+    };
+    dealOfTheDay: {
+        productId: number;
+        titleColor?: string;
+        subtitleColor?: string;
+    };
+    allOffersGrid: {
+        title: string;
+        titleColor?: string;
+        useManualSelection: boolean;
+        manualProductIds: number[];
+        limit: number;
+    };
+}
+
 export interface Promotion {
   id: number;
   name: string;

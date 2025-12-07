@@ -313,7 +313,7 @@ const AppContent: React.FC = () => {
 
         // 2. Layout Standard
         return (
-            <div className="flex flex-col min-h-screen transition-colors duration-300 bg-rose-50/50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans">
+            <div className="flex flex-col min-h-screen w-full overflow-x-hidden transition-colors duration-300 bg-rose-50/50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans">
                 <TopBar user={user} onNavigateToAdmin={navigateToAdmin} onNavigateToStores={navigateToStores} />
                 <Header 
                     user={user}

@@ -11,9 +11,10 @@ import { ManageAdsPage } from './ManageAdsPage';
 import { ManagePromotionsPage } from './ManagePromotionsPage';
 import { ManageStoresPage } from './ManageStoresPage';
 import { AdminChat } from './AdminChat';
+import { ManageOffersPage } from './ManageOffersPage'; // Import
 import type { Product, Category, Pack, Order, ContactMessage, Advertisements, Promotion, Store } from '../../types';
 
-export type AdminPageName = 'dashboard' | 'chat' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'promotions' | 'ads' | 'stores';
+export type AdminPageName = 'dashboard' | 'chat' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'promotions' | 'ads' | 'stores' | 'offers'; // Add 'offers'
 
 interface AdminPageProps {
     onNavigateHome: () => void;
@@ -88,6 +89,8 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                             allPacks={props.packsData}
                             allCategories={props.categoriesData}
                         />;
+            case 'offers': // New Case
+                return <ManageOffersPage allProducts={props.productsData} />;
             default:
                 return <DashboardHomePage orders={props.ordersData} products={props.productsData} messages={props.messagesData}/>;
         }

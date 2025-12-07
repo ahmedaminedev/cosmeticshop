@@ -14,11 +14,12 @@ const categoryRoutes = require('./routes/categories');
 const storeRoutes = require('./routes/stores');
 const promotionRoutes = require('./routes/promotions');
 const advertisementRoutes = require('./routes/advertisements');
+const offersConfigRoutes = require('./routes/offersConfig'); // Import
 const blogRoutes = require('./routes/blog');
 const contactRoutes = require('./routes/contact');
 const chatRoutes = require('./routes/chat');
 const paymentRoutes = require('./routes/payment');
-const reviewRoutes = require('./routes/reviews'); // Ajout
+const reviewRoutes = require('./routes/reviews');
 
 // Config Passport
 require('./config/passport')(passport);
@@ -39,8 +40,6 @@ const corsOptions = {
         if (isDevelopment) {
             return callback(null, true);
         } else {
-            // En production, autoriser le frontend (qui est servi par la même origine)
-            // ou l'URL Azure spécifique si nécessaire
             return callback(null, true); 
         }
     },
@@ -66,6 +65,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/stores', storeRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/advertisements', advertisementRoutes);
+app.use('/api/offers-config', offersConfigRoutes); // Use Route
 app.use('/api/blog', blogRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/chat', chatRoutes);
@@ -74,11 +74,7 @@ app.use('/api/reviews', reviewRoutes);
 
 // --- SERVING FRONTEND IN PRODUCTION ---
 if (process.env.NODE_ENV === 'production') {
-    // Servir les fichiers statiques du dossier build/dist
-    // On suppose que le dossier 'dist' du frontend sera copié dans 'backend/public' lors du déploiement
     app.use(express.static(path.join(__dirname, '../public')));
-
-    // Pour toute autre route (non API), renvoyer l'index.html du frontend
     app.get('*', (req, res) => {
         res.sendFile(path.resolve(__dirname, '../public', 'index.html'));
     });
