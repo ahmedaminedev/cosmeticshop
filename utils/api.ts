@@ -1,6 +1,4 @@
 
-import { allProducts, packs, categories, initialStores, mockPromotions, initialAdvertisements, blogPosts, contactMessages, sampleOrders } from '../constants';
-
 // Use relative URL to leverage Vite proxy in development
 const BACKEND_URL = ''; 
 
@@ -44,15 +42,11 @@ const apiRequest = async (endpoint: string, method: string = 'GET', body?: any, 
 
         if (!response.ok) {
             // Gestion de l'expiration du token (401) ou 403
-            // CRUCIAL: On ne tente le refresh QUE si on avait un token à l'origine.
-            // Si on n'avait pas de token, c'est juste un accès non autorisé normal (visiteur).
             if ((response.status === 401 || response.status === 403) && !isRetry && token) {
                 if (isRefreshing) {
-                    // Si un refresh est déjà en cours, on met cette requête en file d'attente
                     return new Promise((resolve, reject) => {
                         failedQueue.push({ resolve, reject });
                     }).then(newToken => {
-                        // Une fois le refresh terminé, on réessaie avec le nouveau token
                         return apiRequest(endpoint, method, body, true);
                     }).catch(err => {
                         return Promise.reject(err);
@@ -62,7 +56,6 @@ const apiRequest = async (endpoint: string, method: string = 'GET', body?: any, 
                 isRefreshing = true;
 
                 try {
-                    // Tentative de rafraîchissement (le cookie httpOnly est envoyé automatiquement via credentials: include)
                     const refreshResponse = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -71,29 +64,17 @@ const apiRequest = async (endpoint: string, method: string = 'GET', body?: any, 
 
                     if (refreshResponse.ok) {
                         const data = await refreshResponse.json();
-                        // Mise à jour du token d'accès
                         localStorage.setItem('token', data.accessToken);
-                        
-                        // Traitement de la file d'attente
                         processQueue(null, data.accessToken);
                         isRefreshing = false;
-
-                        // Réessai de la requête initiale
                         return apiRequest(endpoint, method, body, true);
                     } else {
-                        // Refresh invalide ou expiré
                         throw new Error("Session expirée");
                     }
                 } catch (refreshError) {
                     processQueue(refreshError, null);
                     isRefreshing = false;
-                    
-                    // Logout complet
                     localStorage.removeItem('token');
-                    // On ne redirige pas brutalement si on est sur la page de login, mais sinon oui
-                    if (!window.location.hash.includes('login') && !window.location.hash.includes('register')) {
-                         // window.location.href = '/#/login'; // Optional: Redirect or just clear state
-                    }
                     throw refreshError;
                 }
             }
@@ -118,7 +99,6 @@ const apiRequest = async (endpoint: string, method: string = 'GET', body?: any, 
         }
         return await response.json();
     } catch (error: any) {
-        // Suppress console error if it's just a session expiry during background check
         if (error.message !== "Session expirée") {
             console.error(`API Request failed: ${method} ${endpoint}`, error);
         }
@@ -126,98 +106,65 @@ const apiRequest = async (endpoint: string, method: string = 'GET', body?: any, 
     }
 };
 
-// Helper to wrap API calls with mock fallback
-const withMockFallback = async <T>(apiCall: () => Promise<T>, mockData: T): Promise<T> => {
-    try {
-        return await apiCall();
-    } catch (error) {
-        // console.warn('Backend unavailable or error, returning fallback data if available.', error);
-        return mockData;
-    }
-};
-
-// Default Offers Config for fallback
-const defaultOffersConfig = {
-    header: {
-        title: "Offres & Privilèges",
-        subtitle: "Découvrez notre sélection de produits de luxe à des prix exceptionnels."
-    },
-    glowRoutine: {
-        title: "GLOW ROUTINE",
-        subtitle: "Your 3-Step Corrective",
-        buttonText: "Shop Now",
-        image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop"
-    },
-    essentials: {
-        title: "NEW TO IT?",
-        subtitle: "Here are the essentials you need.",
-        buttonText: "Start Here",
-        image: "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=1000&auto=format&fit=crop"
-    },
-    dealOfTheDay: {
-        productId: 1
-    }
-};
-
 export const api = {
     // Auth
     login: (credentials: any) => apiRequest('/auth/login', 'POST', credentials),
     register: (userData: any) => apiRequest('/auth/register', 'POST', userData),
-    getMe: () => apiRequest('/auth/me'), // Direct API call, no mock fallback
+    getMe: () => apiRequest('/auth/me'),
     logout: () => {
-        // On appelle le endpoint logout pour nettoyer les cookies, puis on vide le localstorage
         return apiRequest('/auth/logout').finally(() => {
             localStorage.removeItem('token');
         });
     },
 
     // Products
-    getProducts: () => withMockFallback(() => apiRequest('/products'), allProducts),
+    getProducts: () => apiRequest('/products'),
     createProduct: (product: any) => apiRequest('/products', 'POST', product),
     updateProduct: (id: number | string, product: any) => apiRequest(`/products/${id}`, 'PUT', product),
     deleteProduct: (id: number | string) => apiRequest(`/products/${id}`, 'DELETE'),
 
     // Packs
-    getPacks: () => withMockFallback(() => apiRequest('/packs'), packs),
+    getPacks: () => apiRequest('/packs'),
 
     // Categories
-    getCategories: () => withMockFallback(() => apiRequest('/categories'), categories),
+    getCategories: () => apiRequest('/categories'),
 
     // Stores
-    getStores: () => withMockFallback(() => apiRequest('/stores'), initialStores),
+    getStores: () => apiRequest('/stores'),
 
     // Promotions
-    getPromotions: () => withMockFallback(() => apiRequest('/promotions'), mockPromotions),
+    getPromotions: () => apiRequest('/promotions'),
 
     // Advertisements
-    getAdvertisements: () => withMockFallback(() => apiRequest('/advertisements'), initialAdvertisements),
+    getAdvertisements: () => apiRequest('/advertisements'),
+    updateAdvertisements: (ads: any) => apiRequest('/advertisements', 'POST', ads),
 
     // Offers Config
-    getOffersConfig: () => withMockFallback(() => apiRequest('/offers-config'), defaultOffersConfig),
+    getOffersConfig: () => apiRequest('/offers-config'),
     updateOffersConfig: (config: any) => apiRequest('/offers-config', 'POST', config),
 
     // Orders
     createOrder: (order: any) => apiRequest('/orders', 'POST', order),
-    getMyOrders: () => withMockFallback(() => apiRequest('/orders/myorders'), sampleOrders),
-    getAllOrders: () => withMockFallback(() => apiRequest('/orders'), sampleOrders),
+    getMyOrders: () => apiRequest('/orders/myorders'),
+    getAllOrders: () => apiRequest('/orders'),
 
     // Payment
     initiatePayment: (data: { orderId: string; amount: number; customerInfo: any }) => apiRequest('/payment/create', 'POST', data),
 
     // Blog
-    getBlogPosts: () => withMockFallback(() => apiRequest('/blog'), blogPosts),
-    getBlogPostBySlug: (slug: string) => withMockFallback(() => apiRequest(`/blog/${slug}`), blogPosts.find(p => p.slug === slug)),
+    getBlogPosts: () => apiRequest('/blog'),
+    getBlogPostBySlug: (slug: string) => apiRequest(`/blog/${slug}`),
     createBlogPost: (postData: any) => apiRequest('/blog', 'POST', postData),
 
     // Contact
     sendMessage: (data: { name: string; email: string; subject: string; message: string }) => apiRequest('/contact', 'POST', data),
-    getMessages: () => withMockFallback(() => apiRequest('/contact'), contactMessages),
+    getMessages: () => apiRequest('/contact'),
 
     // Chat
     getChatHistory: (userId: string) => apiRequest(`/chat/${userId}`),
     getAllChats: () => apiRequest('/chat/all'),
 
     // Reviews
-    getReviews: (targetType: 'product' | 'pack', targetId: number) => withMockFallback(() => apiRequest(`/reviews/${targetType}/${targetId}`), []),
+    getReviews: (targetType: 'product' | 'pack', targetId: number) => apiRequest(`/reviews/${targetType}/${targetId}`),
     createReview: (data: { targetId: number; targetType: 'product' | 'pack'; rating: number; comment: string }) => apiRequest('/reviews', 'POST', data),
 };

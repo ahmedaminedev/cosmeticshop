@@ -248,13 +248,47 @@ export interface FlashSalePromoAd extends BaseSmallPromoAd {
 
 export type SmallPromoAd = DiscountPromoAd | PriceStartPromoAd | FlashSalePromoAd;
 
+// --- NEW CONFIG TYPES FOR HOME PAGE ---
+export interface TrustBadgeConfig {
+    id: number;
+    title: string;
+    subtitle: string;
+}
+
+export interface ProductCarouselConfig {
+    title: string;
+    productIds: number[];
+    limit?: number;
+}
+
+export interface VirtualTryOnConfig {
+    title: string;
+    description: string;
+    buttonText: string;
+    imageLeft?: string;
+    imageRight?: string;
+    link?: string;
+}
+
+export interface FeaturedGridConfig {
+    title: string;
+    productIds: number[];
+    buttonText: string;
+    buttonLink: string;
+}
+
 export interface Advertisements {
   heroSlides: HeroSlide[];
+  trustBadges?: TrustBadgeConfig[]; // New
   audioPromo: AudioPromoAd[];
   promoBanners: [MediumPromoAd, MediumPromoAd];
   smallPromoBanners: ImagePromoAd[];
   editorialCollage: CollageItem[];
-  shoppableVideos: ShoppableVideo[]; // Nouveau champ
+  shoppableVideos: ShoppableVideo[];
+  newArrivals?: ProductCarouselConfig; 
+  summerSelection?: ProductCarouselConfig;
+  virtualTryOn?: VirtualTryOnConfig; 
+  featuredGrid?: FeaturedGridConfig; // New
 }
 
 export interface OffersPageConfig {

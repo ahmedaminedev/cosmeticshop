@@ -7,14 +7,14 @@ import { ManageCategoriesPage } from './ManageCategoriesPage';
 import { ManagePacksPage } from './ManagePacksPage';
 import { ViewOrdersPage } from './ViewOrdersPage';
 import { ViewMessagesPage } from './ViewMessagesPage';
-import { ManageAdsPage } from './ManageAdsPage';
+import { ManageHomePage } from './ManageHomePage';
 import { ManagePromotionsPage } from './ManagePromotionsPage';
 import { ManageStoresPage } from './ManageStoresPage';
 import { AdminChat } from './AdminChat';
-import { ManageOffersPage } from './ManageOffersPage'; // Import
+import { ManageOffersPage } from './ManageOffersPage'; 
 import type { Product, Category, Pack, Order, ContactMessage, Advertisements, Promotion, Store } from '../../types';
 
-export type AdminPageName = 'dashboard' | 'chat' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'promotions' | 'ads' | 'stores' | 'offers'; // Add 'offers'
+export type AdminPageName = 'dashboard' | 'chat' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'promotions' | 'home' | 'stores' | 'offers';
 
 interface AdminPageProps {
     onNavigateHome: () => void;
@@ -81,25 +81,29 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                             stores={props.storesData}
                             setStores={props.setStoresData}
                         />;
-            case 'ads':
-                return <ManageAdsPage 
+            case 'home':
+                return <ManageHomePage 
                             initialAds={props.advertisementsData}
                             onSave={props.setAdvertisementsData}
                             allProducts={props.productsData}
                             allPacks={props.packsData}
                             allCategories={props.categoriesData}
                         />;
-            case 'offers': // New Case
+            case 'offers': 
                 return <ManageOffersPage allProducts={props.productsData} />;
             default:
                 return <DashboardHomePage orders={props.ordersData} products={props.productsData} messages={props.messagesData}/>;
         }
     };
 
+    // Determine if the current page is a visual editor that needs full height/width
+    const isVisualEditor = activePage === 'home' || activePage === 'offers' || activePage === 'chat';
+
     return (
-        <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
             <AdminSidebar activePage={activePage} setActivePage={setActivePage} onNavigateHome={props.onNavigateHome} onLogout={props.onLogout} />
-            <main className="flex-1 p-8 overflow-y-auto">
+            
+            <main className={`flex-1 flex flex-col min-w-0 ${isVisualEditor ? 'p-0 overflow-hidden' : 'p-8 overflow-y-auto'}`}>
                 {renderActivePage()}
             </main>
         </div>

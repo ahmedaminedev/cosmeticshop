@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/electroshop");
+    const conn = await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/cosmeticshop");
     console.log(`MongoDB Connecté: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Erreur MongoDB: ${error.message}`);

@@ -37,18 +37,43 @@ export const HomePage: React.FC<HomePageProps> = ({
     brands 
 }) => {
     
-    // Calcul dynamique des sélections (Nouveautés = derniers produits)
+    // Calcul dynamique des sélections (Basé sur la config Admin)
     const newArrivalProducts = useMemo(() => {
+        const config = advertisements.newArrivals;
+        if (config && config.productIds && config.productIds.length > 0) {
+            // Filtrer les produits qui correspondent aux IDs de la config
+            const selected = products.filter(p => config.productIds.includes(p.id));
+            
+            // Trier pour respecter l'ordre d'insertion dans la config (optionnel mais recommandé)
+            selected.sort((a, b) => config.productIds.indexOf(a.id) - config.productIds.indexOf(b.id));
+            
+            // Appliquer la limite définie par l'admin
+            return selected.slice(0, config.limit || 8);
+        }
+        // Fallback: Si pas de config, prendre les 8 premiers
         return products.length > 0 ? products.slice(0, 8) : [];
-    }, [products]);
+    }, [products, advertisements.newArrivals]);
 
     // Filter products for the "Accessoires" Editorial List
     const accessoryProducts = useMemo(() => {
         return products.filter(p => p.category === 'Accessoires');
     }, [products]);
 
-    // Calcul dynamique des sélections (Été = produits avec mots clés spécifiques)
+    // Calcul dynamique des sélections (Basé sur la config Admin)
     const summerSelectionProducts = useMemo(() => {
+        const config = advertisements.summerSelection;
+        if (config && config.productIds && config.productIds.length > 0) {
+             // Filtrer les produits qui correspondent aux IDs de la config
+            const selected = products.filter(p => config.productIds.includes(p.id));
+            
+            // Trier pour respecter l'ordre d'insertion dans la config
+            selected.sort((a, b) => config.productIds.indexOf(a.id) - config.productIds.indexOf(b.id));
+            
+            // Appliquer la limite définie par l'admin
+            return selected.slice(0, config.limit || 8);
+        }
+        
+        // Fallback: Si pas de config, logique par défaut (mot clé)
         const summerItems = products.filter(p => 
             p.category.toLowerCase().includes('climat') || 
             p.name.toLowerCase().includes('climat') || 
@@ -56,17 +81,17 @@ export const HomePage: React.FC<HomePageProps> = ({
             p.category.toLowerCase().includes('ventilateur')
         );
         return summerItems.length > 0 ? summerItems.slice(0, 8) : products.slice(8, 16);
-    }, [products]);
+    }, [products, advertisements.summerSelection]);
     
     return (
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 md:mt-8">
             <main className="flex-1 min-w-0 relative z-10">
                 <HeroSection slides={advertisements.heroSlides} />
-                <TrustBadges />
+                <TrustBadges badges={advertisements.trustBadges} />
                 
                 {newArrivalProducts.length > 0 && (
                     <ProductCarousel 
-                        title="Nouvelles Arrivées" 
+                        title={advertisements.newArrivals?.title || "Nouvelles Arrivées"} 
                         products={newArrivalProducts} 
                         onPreview={onPreview} 
                         onNavigateToProductDetail={onNavigateToProductDetail} 
@@ -100,17 +125,22 @@ export const HomePage: React.FC<HomePageProps> = ({
                 
                 {summerSelectionProducts.length > 0 && (
                     <ProductCarousel 
-                        title="Sélection d'été" 
+                        title={advertisements.summerSelection?.title || "Sélection d'été"} 
                         products={summerSelectionProducts} 
                         onPreview={onPreview} 
                         onNavigateToProductDetail={onNavigateToProductDetail} 
                     />
                 )}
                 
-                <ProductGridSection allProducts={products} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
+                <ProductGridSection 
+                    allProducts={products} 
+                    onPreview={onPreview} 
+                    onNavigateToProductDetail={onNavigateToProductDetail}
+                    config={advertisements.featuredGrid}
+                />
                 
                 {/* Virtual Try-On Block */}
-                <VirtualTryOnSection />
+                <VirtualTryOnSection config={advertisements.virtualTryOn} />
                 
                 <BrandCarousel brands={brands} />
             </main>

@@ -18,8 +18,22 @@ import { ProductPreviewModal } from './components/ProductPreviewModal';
 
 // Utils & Data
 import { api } from './utils/api';
-import type { User, Product, Category, Pack, Order, CartItem, CustomerInfo, ContactMessage } from './types';
-import { initialAdvertisements } from './constants';
+import type { User, Product, Category, Pack, Order, CartItem, CustomerInfo, ContactMessage, Advertisements } from './types';
+
+// Define empty skeleton locally to avoid using constants.ts
+const emptyAdvertisements: Advertisements = {
+    heroSlides: [],
+    audioPromo: [],
+    promoBanners: [{id:0, title:'', subtitle:'', buttonText:'', image:'', linkType:'category', linkTarget:''}, {id:0, title:'', subtitle:'', buttonText:'', image:'', linkType:'category', linkTarget:''}],
+    smallPromoBanners: [],
+    editorialCollage: [],
+    shoppableVideos: [],
+    trustBadges: [],
+    newArrivals: { title: "", productIds: [] },
+    summerSelection: { title: "", productIds: [] },
+    virtualTryOn: { title: "", description: "", buttonText: "" },
+    featuredGrid: { title: "", productIds: [], buttonText: "", buttonLink: "" }
+};
 
 // --- LAZY LOADING DES PAGES ---
 const HomePage = React.lazy(() => import('./components/HomePage').then(module => ({ default: module.HomePage })));
@@ -70,7 +84,7 @@ const AppContent: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [adminMessages, setAdminMessages] = useState<ContactMessage[]>([]); // New state for admin messages
     const [promotionsData, setPromotionsData] = useState<any[]>([]);
-    const [advertisements, setAdvertisements] = useState(initialAdvertisements);
+    const [advertisements, setAdvertisements] = useState<Advertisements>(emptyAdvertisements);
     
     // UI State
     const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
@@ -144,14 +158,18 @@ const AppContent: React.FC = () => {
                     api.getPacks(),
                     api.getCategories(),
                     api.getStores(),
-                    api.getAdvertisements()
+                    api.getAdvertisements() // Use DB data exclusively
                 ]);
                 
                 setProducts(productsData);
                 setPacks(packsData);
                 setCategories(categoriesData);
                 setStores(storesData);
-                setAdvertisements({...initialAdvertisements, ...adsData}); 
+                
+                // Directly set the data from API
+                if (adsData) {
+                    setAdvertisements(adsData); 
+                }
 
                 const token = localStorage.getItem('token');
                 if (token) {

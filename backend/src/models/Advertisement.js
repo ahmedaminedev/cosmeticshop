@@ -7,8 +7,13 @@ const AdvertisementSchema = new mongoose.Schema({
   audioPromo: [],
   promoBanners: [],
   smallPromoBanners: [],
-  editorialCollage: [], // Nouveau champ pour le layout masonry
-  shoppableVideos: [] // Nouveau champ pour les vidéos shoppable (Reels)
-});
+  editorialCollage: [],
+  shoppableVideos: [],
+  trustBadges: [],
+  newArrivals: Object,
+  summerSelection: Object,
+  virtualTryOn: Object,
+  featuredGrid: Object
+}, { strict: false });
 
 module.exports = mongoose.model('Advertisement', AdvertisementSchema);

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Logo } from '../Logo';
-import { ChartPieIcon, ShoppingBagIcon, TagIcon, CubeIcon, UsersIcon, InboxIcon, WrenchIcon, ArrowLongLeftIcon, SparklesIcon, StorefrontIcon } from '../IconComponents';
+import { ChartPieIcon, ShoppingBagIcon, TagIcon, CubeIcon, UsersIcon, InboxIcon, HomeIcon, ArrowLongLeftIcon, SparklesIcon, StorefrontIcon } from '../IconComponents';
 import type { AdminPageName } from './AdminPage';
 import { CustomAlert } from '../CustomAlert';
 
@@ -70,15 +70,15 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activePage, setActiv
     const navItems: { id: AdminPageName, label: string, icon: React.ReactNode }[] = [
         { id: 'dashboard', label: 'Dashboard', icon: <ChartPieIcon /> },
         { id: 'chat', label: 'Live Chat', icon: <ChatBubbleLeftRightIcon /> },
+        { id: 'home', label: 'Gestion Accueil', icon: <HomeIcon /> },
+        { id: 'offers', label: 'Gestion Offres', icon: <TagIconSolid /> },
         { id: 'products', label: 'Produits', icon: <ShoppingBagIcon /> },
         { id: 'categories', label: 'Catégories', icon: <TagIcon /> },
         { id: 'packs', label: 'Packs', icon: <CubeIcon /> },
         { id: 'orders', label: 'Commandes', icon: <UsersIcon /> },
         { id: 'messages', label: 'Messages', icon: <InboxIcon /> },
         { id: 'promotions', label: 'Promotions', icon: <SparklesIcon /> },
-        { id: 'offers', label: 'Gestion des Offres', icon: <TagIconSolid /> }, // New Link
         { id: 'stores', label: 'Magasins', icon: <StorefrontIcon /> },
-        { id: 'ads', label: 'Publicités', icon: <WrenchIcon /> },
     ];
 
     return (

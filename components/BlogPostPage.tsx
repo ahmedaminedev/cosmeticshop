@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import type { BlogPost } from '../types';
 import { CalendarIcon, FacebookIcon, TwitterIcon, InstagramIcon, ArrowLongLeftIcon, ClockIcon, HeartIcon } from './IconComponents';
-import { blogPosts as initialBlogPosts } from '../constants';
 import { api } from '../utils/api';
 
 interface BlogPostPageProps {
@@ -57,9 +56,7 @@ export const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onNavigateHome
                     setPost(data);
                     document.title = `${data.title} - Le Journal Beauté`;
                 } else {
-                    // Fallback constant
-                    const fallback = initialBlogPosts.find(p => p.slug === slug);
-                    setPost(fallback || null);
+                    setPost(null);
                 }
                 
                 // Load recent posts
@@ -122,7 +119,6 @@ export const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onNavigateHome
                                 <img src={post.authorImageUrl} alt={post.author} className="w-10 h-10 rounded-full border-2 border-white/30 object-cover" />
                                 <div className="text-left">
                                     <p className="font-bold text-white leading-none">{post.author}</p>
-                                    {/* Pas de rôle affiché, juste le nom */}
                                 </div>
                             </div>
                             <div className="hidden sm:block w-px h-8 bg-white/20"></div>
@@ -215,7 +211,7 @@ export const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onNavigateHome
                             <a 
                                 key={recent.id} 
                                 href="#" 
-                                onClick={(e) => { e.preventDefault(); /* Logic handled by parent usually, but here we are inside detail page */ }} 
+                                onClick={(e) => { e.preventDefault(); }} 
                                 className="group block"
                             >
                                 <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6 shadow-md">

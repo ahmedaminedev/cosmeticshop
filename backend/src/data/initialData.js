@@ -165,64 +165,6 @@ const promotions = [
     }
 ];
 
-const blogPosts = [
-    {
-        id: 1,
-        slug: 'routine-soin-matin',
-        title: 'Quelle routine soin adopter le matin pour une peau éclatante ?',
-        excerpt: 'Nettoyage, sérum, hydratation... On vous explique l\'ordre exact pour maximiser l\'efficacité de vos produits.',
-        content: 'Le matin, votre peau a besoin de protection et d\'hydratation. Commencez toujours par nettoyer votre visage pour éliminer le sébum accumulé la nuit. Appliquez ensuite un sérum antioxydant (Vitamine C), suivi de votre crème hydratante. N\'oubliez jamais, au grand jamais, votre protection solaire !',
-        imageUrl: 'https://images.unsplash.com/photo-1576426863848-c2185fc6e818?auto=format&fit=crop&q=80&w=800',
-        author: 'Sarah Bensaid',
-        authorImageUrl: 'https://i.pravatar.cc/150?u=sarah',
-        date: '2023-11-15',
-        category: 'Soins Visage',
-        featured: true,
-    },
-    {
-        id: 2,
-        slug: 'tendance-makeup-2024',
-        title: 'Les tendances maquillage incontournables de 2024',
-        excerpt: 'Du "Clean Girl Aesthetic" au retour des lèvres audacieuses, découvrez ce qui va marquer l\'année beauté.',
-        content: 'Cette année, le teint se veut frais et naturel. On mise sur des blushes crèmes pour un effet bonne mine immédiat. Côté yeux, les liners graphiques colorés font leur grand retour.',
-        imageUrl: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=800',
-        author: 'Leila K.',
-        authorImageUrl: 'https://i.pravatar.cc/150?u=leila',
-        date: '2023-11-10',
-        category: 'Maquillage',
-    },
-    {
-        id: 3,
-        slug: 'choisir-son-parfum',
-        title: 'Comment trouver sa signature olfactive ?',
-        excerpt: 'Floral, boisé, oriental... Nos conseils pour choisir le parfum qui révèle votre personnalité.',
-        content: 'Un parfum est une émotion. Testez toujours le parfum sur votre peau et attendez quelques heures pour découvrir ses notes de cœur et de fond.',
-        imageUrl: 'https://images.unsplash.com/photo-1595867359265-22365a2df23f?auto=format&fit=crop&q=80&w=800',
-        author: 'Myriam D.',
-        authorImageUrl: 'https://i.pravatar.cc/150?u=myriam',
-        date: '2023-10-25',
-        category: 'Parfums',
-    }
-];
-
-const contactMessages = [
-    { id: 1, name: 'Sophie Martin', email: 'sophie@email.com', subject: 'Conseil teinte fond de teint', message: 'Bonjour, j\'hésite entre deux teintes pour le Double Wear...', date: '2023-11-20', read: false },
-];
-
-const sampleOrders = [
-    { 
-        id: 'CS-8024', 
-        customerName: 'Sarra Jlassi', 
-        date: '2023-11-12', 
-        total: 289, 
-        status: 'Livrée', 
-        itemCount: 1,
-        items: [{ ...allProducts[0], productId: 1, quantity: 1, price: 289 }],
-        shippingAddress: { id: 1, type: 'Domicile', street: 'Rue du Lac', city: 'Tunis', postalCode: '1053', isDefault: true },
-        paymentMethod: 'Carte Bancaire'
-    }
-];
-
 const initialAdvertisements = {
     heroSlides: [
         {
@@ -255,6 +197,12 @@ const initialAdvertisements = {
             buttonText: "Explorer"
         }
     ],
+    trustBadges: [
+        { id: 1, title: 'Livraison Rapide', subtitle: 'Sur toute la Tunisie' },
+        { id: 2, title: 'Paiement Sécurisé', subtitle: '100% sécurisé' },
+        { id: 3, title: 'Service Client', subtitle: 'A votre écoute 7j/7' },
+        { id: 4, title: 'Garantie', subtitle: 'Produits authentiques' }
+    ],
     audioPromo: [
         {
             id: 1,
@@ -286,7 +234,7 @@ const initialAdvertisements = {
             linkTarget: 'Coffrets Cadeaux',
         }
     ],
-    smallPromoBanners: [], // Deprecated
+    smallPromoBanners: [], 
     editorialCollage: [
         {
             id: 1,
@@ -361,8 +309,90 @@ const initialAdvertisements = {
             description: "Unboxing de ma commande 🎁",
             productIds: [1, 2]
         }
-    ]
+    ],
+    newArrivals: {
+        title: "Nouvelles Arrivées",
+        productIds: [1, 2, 3, 4, 5, 6, 7, 8],
+        limit: 8
+    },
+    summerSelection: {
+        title: "Sélection d'été",
+        productIds: [9, 10, 11, 12, 13, 14, 15, 16],
+        limit: 8
+    },
+    virtualTryOn: {
+        title: "Virtual Try-On",
+        description: "Essayez rouges à lèvres, fards à joues et plus encore pour découvrir votre nouvelle teinte préférée.",
+        buttonText: "Découvrir maintenant",
+        imageLeft: "https://images.unsplash.com/photo-1625093742435-09869634721c?q=80&w=600&auto=format&fit=crop",
+        imageRight: "https://images.unsplash.com/photo-1591360236480-943049ceab63?q=80&w=600&auto=format&fit=crop",
+        link: "#"
+    },
+    featuredGrid: {
+        title: "Nos Trésors",
+        productIds: [],
+        buttonText: "Voir tous les produits",
+        buttonLink: "#"
+    }
 };
+
+const blogPosts = [
+    {
+        id: 1,
+        slug: 'routine-soin-matin',
+        title: 'Quelle routine soin adopter le matin pour une peau éclatante ?',
+        excerpt: 'Nettoyage, sérum, hydratation... On vous explique l\'ordre exact pour maximiser l\'efficacité de vos produits.',
+        content: 'Le matin, votre peau a besoin de protection et d\'hydratation. Commencez toujours par nettoyer votre visage pour éliminer le sébum accumulé la nuit. Appliquez ensuite un sérum antioxydant (Vitamine C), suivi de votre crème hydratante. N\'oubliez jamais, au grand jamais, votre protection solaire !',
+        imageUrl: 'https://images.unsplash.com/photo-1576426863848-c2185fc6e818?auto=format&fit=crop&q=80&w=800',
+        author: 'Sarah Bensaid',
+        authorImageUrl: 'https://i.pravatar.cc/150?u=sarah',
+        date: '2023-11-15',
+        category: 'Soins Visage',
+        featured: true,
+    },
+    {
+        id: 2,
+        slug: 'tendance-makeup-2024',
+        title: 'Les tendances maquillage incontournables de 2024',
+        excerpt: 'Du "Clean Girl Aesthetic" au retour des lèvres audacieuses, découvrez ce qui va marquer l\'année beauté.',
+        content: 'Cette année, le teint se veut frais et naturel. On mise sur des blushes crèmes pour un effet bonne mine immédiat. Côté yeux, les liners graphiques colorés font leur grand retour.',
+        imageUrl: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=800',
+        author: 'Leila K.',
+        authorImageUrl: 'https://i.pravatar.cc/150?u=leila',
+        date: '2023-11-10',
+        category: 'Maquillage',
+    },
+    {
+        id: 3,
+        slug: 'choisir-son-parfum',
+        title: 'Comment trouver sa signature olfactive ?',
+        excerpt: 'Floral, boisé, oriental... Nos conseils pour choisir le parfum qui révèle votre personnalité.',
+        content: 'Un parfum est une émotion. Testez toujours le parfum sur votre peau et attendez quelques heures pour découvrir ses notes de cœur et de fond.',
+        imageUrl: 'https://images.unsplash.com/photo-1595867359265-22365a2df23f?auto=format&fit=crop&q=80&w=800',
+        author: 'Myriam D.',
+        authorImageUrl: 'https://i.pravatar.cc/150?u=myriam',
+        date: '2023-10-25',
+        category: 'Parfums',
+    }
+];
+
+const contactMessages = [
+    { id: 1, name: 'Sophie Martin', email: 'sophie@email.com', subject: 'Conseil teinte fond de teint', message: 'Bonjour, j\'hésite entre deux teintes pour le Double Wear...', date: '2023-11-20', read: false },
+];
+
+const sampleOrders = [
+    { 
+        id: 'CS-8024', 
+        customerName: 'Sarra Jlassi', 
+        date: '2023-11-12', 
+        total: 289, 
+        status: 'Livrée', 
+        itemCount: 1,
+        items: [{ ...allProducts[0], productId: 1, quantity: 1, price: 289 }],
+        shippingAddress: { id: 1, type: 'Domicile', street: 'Rue du Lac', city: 'Tunis', postalCode: '1053', isDefault: true },
+        paymentMethod: 'Carte Bancaire'
+    }
+];
 
 module.exports = {
     allProducts,

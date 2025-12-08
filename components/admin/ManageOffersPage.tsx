@@ -7,7 +7,7 @@ import { SelectableWrapper } from './SelectableWrapper';
 import { EditorPanel } from './EditorPanel';
 import { GlowRoutinePromo, EssentialsBanner, DealOfTheDay } from '../PromotionsPage';
 import { ProductCard } from '../ProductCard';
-import { SparklesIcon, ShoppingBagIcon, ArrowsPointingOutIcon, XMarkIcon } from '../IconComponents';
+import { SparklesIcon, ArrowsPointingOutIcon, XMarkIcon } from '../IconComponents';
 
 interface ManageOffersPageProps {
     allProducts: Product[];
@@ -152,10 +152,10 @@ export const ManageOffersPage: React.FC<ManageOffersPageProps> = ({ allProducts 
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-gray-100 dark:bg-gray-900 relative">
+        <div className="flex flex-col h-full w-full bg-gray-100 dark:bg-gray-900 relative">
             
             {/* Top Bar */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center shadow-sm z-20">
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center shadow-sm z-20 flex-shrink-0">
                 <div>
                     <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <SparklesIcon className="w-5 h-5 text-rose-500" />
@@ -194,7 +194,7 @@ export const ManageOffersPage: React.FC<ManageOffersPageProps> = ({ allProducts 
                 </div>
 
                 {/* Right: Editor Panel (Sticky) */}
-                <div className="w-[400px] bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl z-10 flex flex-col">
+                <div className="w-[350px] bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl z-10 flex flex-col flex-shrink-0">
                     <EditorPanel 
                         section={activeSection}
                         data={config[activeSection]}

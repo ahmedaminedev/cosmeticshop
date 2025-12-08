@@ -25,7 +25,7 @@ services:
       - "8081:8080"
     environment:
       - PORT=8080
-      - MONGO_URI=mongodb://mongo-service:27017/electroshop
+      - MONGO_URI=mongodb://mongo-service:27017/cosmeticshop
       - JWT_SECRET=secret_dev_key
       # L'URL du frontend vue par le navigateur (pour les redirections OAuth/Paiement)
       - FRONTEND_URL=http://localhost:3000

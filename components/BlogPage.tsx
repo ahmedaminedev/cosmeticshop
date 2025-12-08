@@ -2,7 +2,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { BlogPost } from '../types';
 import { CalendarIcon, ArrowUpRightIcon, SparklesIcon, PencilIcon } from './IconComponents';
-import { blogPosts as initialBlogPosts } from '../constants'; // Fallback
 import { CreateBlogModal } from './CreateBlogModal';
 import { api } from '../utils/api';
 import { useToast } from './ToastContext';
@@ -141,11 +140,11 @@ export const BlogPage: React.FC<BlogPageProps> = ({ onNavigateHome, onSelectPost
                 if (posts && posts.length > 0) {
                     setBlogPosts(posts);
                 } else {
-                    setBlogPosts(initialBlogPosts);
+                    setBlogPosts([]);
                 }
             } catch (err) {
                 console.error(err);
-                setBlogPosts(initialBlogPosts);
+                setBlogPosts([]);
             }
         };
         loadPosts();
