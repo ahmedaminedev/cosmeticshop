@@ -59,13 +59,17 @@ export const EditorialMasonry: React.FC<EditorialMasonryProps> = ({ items, isPre
                         {/* Content - Toujours visible et stylisé */}
                         <div className="absolute bottom-0 left-0 p-5 sm:p-8 w-full flex flex-col justify-end h-full z-20">
                             {item.subtitle && (
-                                <p className="text-xs font-bold text-rose-200 uppercase tracking-[0.2em] mb-2 drop-shadow-md translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                                    {item.subtitle}
+                                <p 
+                                    className="text-xs font-bold text-rose-200 uppercase tracking-[0.2em] mb-2 drop-shadow-md translate-y-2 group-hover:translate-y-0 transition-transform duration-300"
+                                    dangerouslySetInnerHTML={{ __html: item.subtitle }}
+                                >
                                 </p>
                             )}
                             {item.title && (
-                                <h3 className="text-2xl md:text-4xl font-serif font-extrabold text-white leading-none drop-shadow-lg tracking-tight mb-2 translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">
-                                    {item.title}
+                                <h3 
+                                    className="text-2xl md:text-4xl font-serif font-extrabold text-white leading-none drop-shadow-lg tracking-tight mb-2 translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75"
+                                    dangerouslySetInnerHTML={{ __html: item.title }}
+                                >
                                 </h3>
                             )}
                             

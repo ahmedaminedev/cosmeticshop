@@ -20,6 +20,11 @@ exports.getBlogPostBySlug = catchAsync(async (req, res) => {
 exports.createBlogPost = catchAsync(async (req, res) => {
   const { title, content, excerpt, category, imageUrl } = req.body;
 
+  // Validation
+  if (!title || !content || !imageUrl) {
+      return res.status(400).json({ message: "Titre, contenu et image sont obligatoires." });
+  }
+
   // Génération simple du slug à partir du titre
   const slug = title
     .toLowerCase()
@@ -30,23 +35,23 @@ exports.createBlogPost = catchAsync(async (req, res) => {
 
   // On utilise le nom de l'utilisateur connecté comme auteur
   // Pas de distinction de rôle ici (Admin ou Client = Auteur)
-  const authorName = `${req.user.firstName} ${req.user.lastName}`;
+  const authorName = req.user ? `${req.user.firstName} ${req.user.lastName}` : "Anonyme";
   
   // Image par défaut si l'user n'en a pas (Avatar généré)
-  const authorImage = req.user.photo_profil || `https://ui-avatars.com/api/?name=${req.user.firstName}+${req.user.lastName}&background=random&color=fff`;
+  const authorImage = (req.user && req.user.photo_profil) || `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=random&color=fff`;
 
   const newPost = await BlogPost.create({
     id: Date.now(),
     slug,
     title,
     content,
-    excerpt,
-    category,
-    imageUrl,
+    excerpt: excerpt || content.substring(0, 150) + '...',
+    category: category || 'Général',
+    imageUrl, // This accepts base64
     author: authorName,
     authorImageUrl: authorImage,
     date: new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }),
-    userId: req.user._id, 
+    userId: req.user ? req.user._id : undefined, 
     featured: false 
   });
 

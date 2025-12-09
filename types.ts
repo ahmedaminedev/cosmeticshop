@@ -1,4 +1,9 @@
 
+export interface ProductColor {
+    name: string;
+    hex: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -8,12 +13,14 @@ export interface Product {
   imageUrl: string; // Gardé pour rétrocompatibilité (sera l'image principale)
   images: string[]; // Nouveau champ pour la galerie
   discount?: number;
-  category: string;
+  category: string; // Sous-catégorie
+  parentCategory?: string; // Catégorie parente
   promo?: boolean;
   material?: string;
   description?: string;
   quantity: number;
   specifications?: { name: string; value: string; }[];
+  colors?: ProductColor[]; // NOUVEAU
   // Nouveau bloc éditorial
   highlights?: {
     title: string;
@@ -54,10 +61,17 @@ export interface Category {
   megaMenu?: SubCategoryGroup[];
 }
 
+export interface BrandCategoryLink {
+    parentCategory: string;
+    subCategory: string;
+}
+
 export interface Brand {
+    id: number;
     name: string;
-    productCount: number;
     logoUrl: string;
+    productCount?: number; // Calculated on frontend mostly
+    associatedCategories?: BrandCategoryLink[];
 }
 
 export interface Pack {
@@ -96,6 +110,7 @@ export interface CartItem {
   imageUrl: string;
   quantity: number;
   originalItem: Cartable;
+  selectedColor?: string; // Pour le panier si une couleur est choisie
 }
 
 export interface OrderItem {
@@ -104,6 +119,7 @@ export interface OrderItem {
   imageUrl: string;
   quantity: number;
   price: number;
+  selectedColor?: string;
 }
 
 
@@ -130,7 +146,7 @@ export interface ContactMessage {
 }
 
 export interface Address {
-  id: number | string; // Changé pour accepter les IDs générés par Mongo ou Frontend
+  id: number | string; // Changé pour accepter l'ObjectId MongoDB converti en string
   type: 'Domicile' | 'Travail';
   street: string;
   city: string;
@@ -158,6 +174,7 @@ export interface HeroSlide {
   title: string;
   subtitle: string;
   buttonText: string;
+  link?: string; // New: Dynamic link
 }
 
 export interface DestockageAd {
@@ -185,8 +202,9 @@ export interface MediumPromoAd {
   subtitle: string;
   buttonText: string;
   image: string;
-  linkType: 'category' | 'pack';
-  linkTarget: string; // Category name or Pack ID as a string
+  link?: string; // New: Dynamic link replacing Type/Target
+  linkType?: 'category' | 'pack'; // Deprecated but kept for type safety momentarily
+  linkTarget?: string; // Deprecated
 }
 
 export interface ImagePromoAd {
@@ -253,6 +271,7 @@ export interface TrustBadgeConfig {
     id: number;
     title: string;
     subtitle: string;
+    iconUrl?: string; // Add iconUrl for dynamic icons
 }
 
 export interface ProductCarouselConfig {
@@ -261,13 +280,29 @@ export interface ProductCarouselConfig {
     limit?: number;
 }
 
+export interface VirtualTryOnImage {
+    url: string;
+    scale?: number; // Percentage (e.g. 100, 120)
+    top?: number; // Percentage offset (e.g. -10, 10)
+    rotation?: number; // Degrees
+}
+
 export interface VirtualTryOnConfig {
     title: string;
     description: string;
     buttonText: string;
-    imageLeft?: string;
-    imageRight?: string;
     link?: string;
+    
+    // Background Customization
+    backgroundType?: 'color' | 'image';
+    backgroundColor?: string; // Hex or gradient string
+    backgroundImage?: string; // URL
+    backgroundGallery?: string[]; // Persisted Gallery Images
+    textColor?: string; // Hex for contrast
+
+    // Images with detailed positioning
+    imageLeft?: VirtualTryOnImage | string; // Union type for backward compat
+    imageRight?: VirtualTryOnImage | string;
 }
 
 export interface FeaturedGridConfig {
@@ -291,6 +326,30 @@ export interface Advertisements {
   featuredGrid?: FeaturedGridConfig; // New
 }
 
+export interface GlowRoutineConfig {
+    title: string;
+    titleColor?: string;
+    subtitle: string;
+    subtitleColor?: string;
+    buttonText: string;
+    buttonColor?: string;
+    buttonTextColor?: string;
+    image: string;
+    link?: string; // New
+}
+
+export interface EssentialsConfig {
+    title: string;
+    titleColor?: string;
+    subtitle: string;
+    subtitleColor?: string;
+    buttonText: string;
+    buttonColor?: string;
+    buttonTextColor?: string;
+    image: string;
+    link?: string; // New
+}
+
 export interface OffersPageConfig {
     header: {
         title: string;
@@ -298,26 +357,8 @@ export interface OffersPageConfig {
         subtitle: string;
         subtitleColor?: string;
     };
-    glowRoutine: {
-        title: string;
-        titleColor?: string;
-        subtitle: string;
-        subtitleColor?: string;
-        buttonText: string;
-        buttonColor?: string;
-        buttonTextColor?: string;
-        image: string;
-    };
-    essentials: {
-        title: string;
-        titleColor?: string;
-        subtitle: string;
-        subtitleColor?: string;
-        buttonText: string;
-        buttonColor?: string;
-        buttonTextColor?: string;
-        image: string;
-    };
+    glowRoutine: GlowRoutineConfig;
+    essentials: EssentialsConfig;
     dealOfTheDay: {
         productId: number;
         titleColor?: string;

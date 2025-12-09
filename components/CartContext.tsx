@@ -4,7 +4,7 @@ import type { CartItem, Cartable } from '../types';
 
 interface CartContextType {
     cartItems: CartItem[];
-    addToCart: (item: Cartable, quantity?: number) => void;
+    addToCart: (item: Cartable, quantity?: number, selectedColor?: string) => void;
     removeFromCart: (itemId: string) => void;
     updateQuantity: (itemId: string, newQuantity: number) => void;
     clearCart: () => void;
@@ -42,9 +42,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const openCart = useCallback(() => setIsCartOpen(true), []);
     const closeCart = useCallback(() => setIsCartOpen(false), []);
 
-    const addToCart = useCallback((item: Cartable, quantity = 1) => {
+    const addToCart = useCallback((item: Cartable, quantity = 1, selectedColor?: string) => {
         const isPack = 'includedItems' in item;
-        const id = `${isPack ? 'pack' : 'product'}-${item.id}`;
+        // Création d'un ID unique composite : type-id-couleur (si couleur existe)
+        // Pour éviter les doublons si on ajoute la même couleur, ou créer une nouvelle ligne si couleur différente
+        const colorSuffix = selectedColor ? `-${selectedColor.replace(/\s+/g, '')}` : '';
+        const id = `${isPack ? 'pack' : 'product'}-${item.id}${colorSuffix}`;
 
         setCartItems(prevItems => {
             const existingItem = prevItems.find(i => i.id === id);
@@ -59,7 +62,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     price: item.price,
                     imageUrl: item.imageUrl,
                     quantity,
-                    originalItem: item
+                    originalItem: item,
+                    selectedColor: selectedColor // Ajout de la couleur à l'objet item
                 };
                 return [...prevItems, newItem];
             }

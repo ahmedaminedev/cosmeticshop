@@ -65,54 +65,51 @@ export const ManageOffersPage: React.FC<ManageOffersPageProps> = ({ allProducts 
 
     if (!config) return <div className="p-8 text-center">Chargement de l'éditeur...</div>;
 
-    const renderPreviewContent = (interactive: boolean) => {
-        const Wrapper = ({ children, section, label }: { children: React.ReactNode, section: SectionType, label: string }) => {
-            if (interactive) {
-                return (
-                    <SelectableWrapper
-                        isActive={activeSection === section}
-                        onClick={() => setActiveSection(section)}
-                        label={label}
-                    >
-                        {children}
-                    </SelectableWrapper>
-                );
-            }
-            // For fullscreen, just render clean children
-            return <div>{children}</div>;
-        };
+    const renderSection = (section: SectionType, label: string, content: React.ReactNode, interactive: boolean) => {
+        if (interactive) {
+            return (
+                <SelectableWrapper
+                    isActive={activeSection === section}
+                    onClick={() => setActiveSection(section)}
+                    label={label}
+                >
+                    {content}
+                </SelectableWrapper>
+            );
+        }
+        return <div>{content}</div>;
+    };
 
+    const renderPreviewContent = (interactive: boolean) => {
         return (
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-                <Wrapper section="header" label="En-tête">
+                {renderSection('header', 'En-tête', (
                     <div className="text-center max-w-3xl mx-auto mt-12 mb-16">
                         <span className="text-rose-500 font-bold uppercase tracking-[0.25em] text-xs mb-3 block">Sélection Exclusive</span>
                         <h1 
                             className="text-4xl md:text-6xl font-serif mb-6 transition-colors duration-300" 
-                            style={{ color: config.header.titleColor }}
                             dangerouslySetInnerHTML={{ __html: config.header.title }}
                         >
                         </h1>
                         <p 
                             className="font-light text-lg leading-relaxed transition-colors duration-300" 
-                            style={{ color: config.header.subtitleColor }}
                             dangerouslySetInnerHTML={{ __html: config.header.subtitle }}
                         >
                         </p>
                     </div>
-                </Wrapper>
+                ), interactive)}
 
                 <div className="space-y-12 mb-20">
-                    <Wrapper section="glowRoutine" label="Bloc Glow Routine">
+                    {renderSection('glowRoutine', 'Bloc Glow Routine', (
                         <GlowRoutinePromo config={config.glowRoutine} />
-                    </Wrapper>
+                    ), interactive)}
                     
-                    <Wrapper section="essentials" label="Bloc Essentials">
+                    {renderSection('essentials', 'Bloc Essentials', (
                         <EssentialsBanner config={config.essentials} />
-                    </Wrapper>
+                    ), interactive)}
                 </div>
 
-                <Wrapper section="dealOfTheDay" label="Offre du Jour">
+                {renderSection('dealOfTheDay', 'Offre du Jour', (
                     <div className={interactive ? "pointer-events-none" : ""}>
                         <DealOfTheDay 
                             product={dealProduct} 
@@ -122,14 +119,13 @@ export const ManageOffersPage: React.FC<ManageOffersPageProps> = ({ allProducts 
                             subtitleColor={config.dealOfTheDay.subtitleColor}
                         />
                     </div>
-                </Wrapper>
+                ), interactive)}
 
-                <Wrapper section="allOffersGrid" label="Grille des Produits">
+                {renderSection('allOffersGrid', 'Grille des Produits', (
                     <div className="mt-12">
                         <div className="flex items-baseline gap-2 mb-6">
                             <h2 
                                 className="text-xl font-serif font-bold" 
-                                style={{ color: config.allOffersGrid?.titleColor }}
                                 dangerouslySetInnerHTML={{ __html: config.allOffersGrid?.title || "Toutes les offres" }}
                             >
                             </h2>
@@ -146,7 +142,7 @@ export const ManageOffersPage: React.FC<ManageOffersPageProps> = ({ allProducts 
                             </div>
                         )}
                     </div>
-                </Wrapper>
+                ), interactive)}
             </div>
         );
     };

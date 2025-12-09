@@ -12,9 +12,10 @@ import { ManagePromotionsPage } from './ManagePromotionsPage';
 import { ManageStoresPage } from './ManageStoresPage';
 import { AdminChat } from './AdminChat';
 import { ManageOffersPage } from './ManageOffersPage'; 
-import type { Product, Category, Pack, Order, ContactMessage, Advertisements, Promotion, Store } from '../../types';
+import { ManageBrandsPage } from './ManageBrandsPage';
+import type { Product, Category, Pack, Order, ContactMessage, Advertisements, Promotion, Store, Brand } from '../../types';
 
-export type AdminPageName = 'dashboard' | 'chat' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'promotions' | 'home' | 'stores' | 'offers';
+export type AdminPageName = 'dashboard' | 'chat' | 'products' | 'categories' | 'packs' | 'orders' | 'messages' | 'promotions' | 'home' | 'stores' | 'offers' | 'brands';
 
 interface AdminPageProps {
     onNavigateHome: () => void;
@@ -35,6 +36,8 @@ interface AdminPageProps {
     setPromotionsData: React.Dispatch<React.SetStateAction<Promotion[]>>;
     storesData: Store[];
     setStoresData: React.Dispatch<React.SetStateAction<Store[]>>;
+    brandsData: Brand[];
+    setBrandsData: React.Dispatch<React.SetStateAction<Brand[]>>;
 }
 
 export const AdminPage: React.FC<AdminPageProps> = (props) => {
@@ -51,11 +54,18 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                             products={props.productsData} 
                             setProducts={props.setProductsData} 
                             categories={props.categoriesData}
+                            brands={props.brandsData}
                         />;
             case 'categories':
                 return <ManageCategoriesPage 
                             categories={props.categoriesData}
                             setCategories={props.setCategoriesData}
+                        />;
+            case 'brands':
+                return <ManageBrandsPage 
+                            brands={props.brandsData}
+                            setBrands={props.setBrandsData}
+                            categories={props.categoriesData}
                         />;
             case 'packs':
                 return <ManagePacksPage 

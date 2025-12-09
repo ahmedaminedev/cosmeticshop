@@ -1,256 +1,294 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import type { Product } from '../types';
+import type { Product, ProductColor } from '../types';
 import { Breadcrumb } from './Breadcrumb';
 import { useCart } from './CartContext';
 import { useFavorites } from './FavoritesContext';
-import { PlusIcon, MinusIcon, HeartIcon, SparklesIcon, CheckCircleIcon } from './IconComponents';
+import { PlusIcon, MinusIcon, HeartIcon, SparklesIcon, CheckCircleIcon, StarIcon } from './IconComponents';
+import { ReviewsSection } from './ReviewsSection';
 import { ProductCarousel } from './ProductCarousel';
 import { ProductGallery } from './ProductGallery';
-import { ProductHighlights } from './ProductHighlights';
-import { ReviewsSection } from './ReviewsSection'; // Import
 
-// Icônes spécifiques beauté (SVG inline)
-const VeganIcon = ({ className }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18m0-18c-4.418 0-8 3.582-8 8s3.582 8 8 8m0-16c4.418 0 8 3.582 8 8s-3.582 8-8 8m-4-6a4 4 0 008 0" />
-    </svg>
-);
-
-const CrueltyFreeIcon = ({ className }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.318l7.682-7.636a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-    </svg>
-);
-
-interface ProductDetailPageProps {
+export const ProductDetailPage: React.FC<{
     product: Product;
     allProducts: Product[];
     onNavigateHome: () => void;
     onNavigateToProductDetail: (productId: number | string) => void;
     onPreview: (product: Product) => void;
-}
-
-const StarRating: React.FC<{ rating: number; reviewCount: number }> = ({ rating, reviewCount }) => (
-    <div className="flex items-center gap-2 group cursor-pointer">
-        <div className="flex items-center text-gold-400">
-            {[...Array(5)].map((_, i) => (
-                <svg key={i} className={`w-3.5 h-3.5 ${i < rating ? 'fill-current' : 'text-gray-200 dark:text-gray-700 fill-gray-200 dark:fill-gray-700'}`} viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-            ))}
-        </div>
-        <span className="text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors border-b border-dashed border-gray-300">
-            ({reviewCount} avis)
-        </span>
-    </div>
-);
-
-type Tab = 'description' | 'ingredients' | 'shipping';
-
-export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, allProducts, onNavigateHome, onNavigateToProductDetail, onPreview }) => {
+}> = ({ product, allProducts, onNavigateHome, onNavigateToProductDetail, onPreview }) => {
     const [quantity, setQuantity] = useState(1);
-    const [activeTab, setActiveTab] = useState<Tab>('description');
+    const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null);
+    const [activeTab, setActiveTab] = useState<'details' | 'usage'>('details');
+    
     const { addToCart, openCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
+    
     const isFav = isFavorite(product.id as number);
     const isOutOfStock = product.quantity === 0;
 
-    const productImages = useMemo(() => {
-        if (product.images && product.images.length > 0) return product.images;
-        return product.imageUrl ? [product.imageUrl] : [];
+    useEffect(() => {
+        document.title = `${product.name} - Cosmetics Shop`;
+        window.scrollTo(0,0);
+        if (product.colors && product.colors.length > 0) {
+            setSelectedColor(product.colors[0]);
+        } else {
+            setSelectedColor(null);
+        }
     }, [product]);
+
+    const handleAddToCart = () => {
+        if (isOutOfStock) return;
+        addToCart({ ...product }, quantity, selectedColor?.name);
+        openCart();
+    };
 
     const similarProducts = useMemo(() => 
         allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 10),
     [allProducts, product]);
 
-    useEffect(() => {
-        document.title = `${product.name} - Cosmetics Shop`;
-        window.scrollTo(0,0);
-    }, [product]);
-
-    const handleAddToCart = () => {
-        if (isOutOfStock) return;
-        addToCart(product, quantity);
-        openCart();
-    };
-
     return (
-        <div className="bg-white dark:bg-gray-950 min-h-screen font-sans text-gray-800 dark:text-gray-200 pb-20 lg:pb-0">
+        <div className="min-h-screen bg-[#FDFBF9] dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 font-sans selection:bg-rose-200 dark:selection:bg-rose-900 overflow-x-hidden">
             
-            {/* Minimalist Breadcrumb */}
-            <div className="border-b border-gray-50 dark:border-gray-900 hidden lg:block">
-                <div className="max-w-screen-xl mx-auto px-8 py-4">
-                    <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: product.category }, { name: product.name }]} />
-                </div>
+            {/* --- BACKGROUND ATMOSPHERIQUE (Blob animés) --- */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-rose-200/40 dark:bg-rose-900/20 rounded-full blur-[120px] animate-blob"></div>
+                <div className="absolute bottom-[10%] left-[-10%] w-[500px] h-[500px] bg-purple-200/40 dark:bg-purple-900/20 rounded-full blur-[120px] animate-blob animation-delay-2000"></div>
             </div>
 
-            <div className="max-w-screen-xl mx-auto px-0 lg:px-8 py-0 lg:py-12">
-                <div className="flex flex-col lg:flex-row lg:gap-16 items-start">
-                    
-                    {/* Left Column: Gallery */}
-                    <div className="w-full lg:w-[60%] mb-8 lg:mb-0 bg-gray-50 dark:bg-gray-900 lg:bg-transparent">
-                        <div className="sticky top-24">
-                            <ProductGallery images={productImages} productName={product.name} />
-                            
-                            {/* Visual Reassurance (Desktop only) */}
-                            <div className="hidden lg:grid mt-10 grid-cols-3 gap-6 pt-8 border-t border-gray-100 dark:border-gray-800">
-                                <div className="text-center group">
-                                    <div className="w-12 h-12 mx-auto bg-rose-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-rose-400 mb-3 transition-colors group-hover:bg-rose-100">
-                                        <SparklesIcon className="w-6 h-6" />
-                                    </div>
-                                    <span className="text-[11px] uppercase tracking-widest font-bold text-gray-500">Authentique</span>
-                                </div>
-                                <div className="text-center group">
-                                    <div className="w-12 h-12 mx-auto bg-rose-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-rose-400 mb-3 transition-colors group-hover:bg-rose-100">
-                                        <VeganIcon className="w-6 h-6" />
-                                    </div>
-                                    <span className="text-[11px] uppercase tracking-widest font-bold text-gray-500">Naturel</span>
-                                </div>
-                                <div className="text-center group">
-                                    <div className="w-12 h-12 mx-auto bg-rose-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-rose-400 mb-3 transition-colors group-hover:bg-rose-100">
-                                        <CrueltyFreeIcon className="w-6 h-6" />
-                                    </div>
-                                    <span className="text-[11px] uppercase tracking-widest font-bold text-gray-500">Cruelty Free</span>
-                                </div>
+            <div className="relative z-10">
+                {/* Navbar Spacer + Breadcrumb (Correction Espacement) */}
+                <div className="pt-32 pb-6 px-6 md:px-12 max-w-[1800px] mx-auto">
+                    <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: product.category }, { name: product.name }]} />
+                </div>
+
+                <div className="max-w-[1800px] mx-auto px-6 md:px-12 pb-20">
+                    <div className="flex flex-col lg:flex-row gap-12 xl:gap-24">
+                        
+                        {/* --- GAUCHE : GALERIE IMAGE (Sticky) --- */}
+                        <div className="w-full lg:w-1/2 relative">
+                            {/* Utilisation de ProductGallery qui contient le zoom */}
+                            <div className="lg:sticky lg:top-32 h-auto">
+                                <ProductGallery 
+                                    images={product.images && product.images.length > 0 ? product.images : [product.imageUrl]} 
+                                    productName={product.name} 
+                                />
                             </div>
                         </div>
-                    </div>
 
-                    {/* Right Column: Product Info */}
-                    <div className="w-full lg:w-[40%] px-6 lg:px-0 relative lg:pt-4">
-                        <div className="sticky top-24 space-y-8">
+                        {/* --- DROITE : CONTENU ÉDITORIAL & ACHAT --- */}
+                        <div className="w-full lg:w-1/2 flex flex-col pt-4 lg:pt-0">
                             
-                            {/* Product Header */}
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                    <h2 className="text-xs font-bold text-rose-500 dark:text-rose-400 uppercase tracking-[0.2em]">
+                            {/* Brand & Title */}
+                            <div className="mb-8 animate-fadeInUp">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span className="px-3 py-1 bg-black dark:bg-white text-white dark:text-black text-[10px] font-bold uppercase tracking-[0.2em] rounded-full">
                                         {product.brand}
-                                    </h2>
-                                    {/* Placeholder star rating (dynamic later) */}
-                                    <StarRating rating={5} reviewCount={0} />
+                                    </span>
+                                    {product.promo && <span className="text-rose-600 font-bold text-xs uppercase tracking-widest animate-pulse">Offre Limitée</span>}
                                 </div>
-
-                                <h1 className="text-3xl lg:text-5xl font-serif font-medium text-gray-900 dark:text-white leading-tight">
+                                <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium leading-[1.1] tracking-tight mb-6 text-gray-900 dark:text-white">
                                     {product.name}
                                 </h1>
-
-                                <div className="flex items-baseline gap-4 pt-2">
-                                    <p className="text-2xl lg:text-3xl font-light text-gray-900 dark:text-white">
-                                        {product.price.toFixed(3)} <span className="text-base lg:text-lg font-normal text-gray-500">TND</span>
-                                    </p>
-                                    {product.oldPrice && (
-                                        <p className="text-base lg:text-lg text-gray-400 line-through font-light">
-                                            {product.oldPrice.toFixed(3)} TND
-                                        </p>
-                                    )}
+                                <div className="flex items-baseline gap-6">
+                                    <p className="text-3xl font-light">{product.price.toFixed(3)} <span className="text-lg text-gray-500 font-normal">TND</span></p>
+                                    {product.oldPrice && <p className="text-xl text-gray-400 line-through decoration-rose-400 decoration-1">{product.oldPrice.toFixed(3)} TND</p>}
                                 </div>
                             </div>
 
-                            {/* Short Description */}
-                            <div className="text-sm lg:text-base text-gray-600 dark:text-gray-300 font-light leading-relaxed">
-                                <p>{product.description ? product.description.substring(0, 150) + '...' : "Un essentiel beauté pour sublimer votre quotidien."}</p>
+                            {/* Description Poétique */}
+                            <div className="prose dark:prose-invert prose-lg text-gray-600 dark:text-gray-300 font-light leading-relaxed mb-10 border-l-2 border-rose-200 dark:border-rose-900 pl-6">
+                                <p>{product.description || "Un élixir de beauté conçu pour sublimer votre naturel. Texture aérienne, fini impeccable et tenue longue durée."}</p>
                             </div>
 
-                            {/* Selectors & Actions (Desktop) */}
-                            <div className="hidden lg:block pt-6 border-t border-gray-100 dark:border-gray-800 space-y-6">
-                                <div className="flex gap-4">
-                                    {/* Quantity */}
-                                    <div className="flex items-center bg-gray-50 dark:bg-gray-800 rounded-full px-1 py-1 w-32 justify-between border border-gray-200 dark:border-gray-700">
-                                        <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-700 text-gray-600 hover:text-rose-500 shadow-sm" disabled={quantity <= 1}><MinusIcon className="w-3 h-3" /></button>
-                                        <span className="font-serif font-bold text-lg">{quantity}</span>
-                                        <button onClick={() => setQuantity(q => q + 1)} className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-gray-700 text-gray-600 hover:text-rose-500 shadow-sm"><PlusIcon className="w-3 h-3" /></button>
+                            {/* --- SÉLECTEUR DE COULEURS ARTISTIQUE --- */}
+                            {product.colors && product.colors.length > 0 && (
+                                <div className="mb-12 animate-fadeIn" style={{ animationDelay: '0.2s' }}>
+                                    <div className="flex justify-between items-end mb-4">
+                                        <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Nuance Sélectionnée</span>
+                                        <span className="font-serif italic text-lg text-rose-600 dark:text-rose-400">{selectedColor?.name}</span>
                                     </div>
+                                    <div className="flex flex-wrap gap-4">
+                                        {product.colors.map((color, idx) => {
+                                            const isSelected = selectedColor?.name === color.name;
+                                            return (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => setSelectedColor(color)}
+                                                    className={`relative group transition-all duration-500 ease-out ${isSelected ? 'scale-110' : 'hover:scale-105'}`}
+                                                >
+                                                    <div 
+                                                        className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 border-2 ${isSelected ? 'border-gray-900 dark:border-white ring-2 ring-rose-200 dark:ring-rose-900' : 'border-transparent'}`}
+                                                        style={{ backgroundColor: color.hex }}
+                                                    >
+                                                        {isSelected && <CheckCircleIcon className="w-5 h-5 text-white drop-shadow-md mix-blend-difference" />}
+                                                    </div>
+                                                    {/* Tooltip Artistique */}
+                                                    <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider bg-white dark:bg-gray-800 px-3 py-1 rounded-full shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                                                        {color.name}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
 
-                                    {/* Add to Bag Button */}
-                                    <button 
-                                        onClick={handleAddToCart} 
-                                        disabled={isOutOfStock}
-                                        className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-serif font-bold uppercase tracking-widest text-sm py-4 rounded-full hover:bg-rose-600 dark:hover:bg-rose-500 dark:hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-                                    >
-                                        <span>{isOutOfStock ? 'Indisponible' : 'Ajouter au sac'}</span>
-                                        {!isOutOfStock && <span className="w-1 h-1 bg-current rounded-full"></span>}
+                            {/* --- ACTION BAR --- */}
+                            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+                                {/* Quantity Stepper */}
+                                <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full px-2 h-14 border border-gray-200 dark:border-gray-700 w-full sm:w-auto justify-between sm:justify-start">
+                                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-12 h-full flex items-center justify-center hover:text-rose-500 transition-colors"><MinusIcon className="w-4 h-4"/></button>
+                                    <span className="w-8 text-center font-bold">{quantity}</span>
+                                    <button onClick={() => setQuantity(quantity + 1)} className="w-12 h-full flex items-center justify-center hover:text-rose-500 transition-colors"><PlusIcon className="w-4 h-4"/></button>
+                                </div>
+
+                                {/* Add To Cart Button */}
+                                <button 
+                                    onClick={handleAddToCart}
+                                    disabled={isOutOfStock}
+                                    className="flex-1 relative overflow-hidden group bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full h-14 font-bold uppercase tracking-widest text-xs transition-all hover:shadow-2xl hover:shadow-rose-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <span className="relative z-10 flex items-center justify-center gap-3 group-hover:gap-6 transition-all duration-300">
+                                        {isOutOfStock ? 'Épuisé' : 'Ajouter au Panier'}
+                                        {!isOutOfStock && <span className="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>}
                                         {!isOutOfStock && <span>{(product.price * quantity).toFixed(3)} TND</span>}
-                                    </button>
-                                    
-                                    <button onClick={() => toggleFavorite(product.id as number)} className={`p-4 rounded-full border transition-all ${isFav ? 'border-rose-200 bg-rose-50 text-rose-500' : 'border-gray-200 text-gray-400 hover:border-gray-400'}`}>
-                                        <HeartIcon className="w-5 h-5" solid={isFav} />
-                                    </button>
-                                </div>
-                                {!isOutOfStock && (
-                                    <div className="flex items-center justify-center gap-2 text-xs text-green-600 font-medium">
-                                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                        En stock - Expédition sous 24h
-                                    </div>
-                                )}
+                                    </span>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black dark:from-gray-100 dark:to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                </button>
+
+                                {/* Wishlist */}
+                                <button 
+                                    onClick={() => toggleFavorite(product.id as number)}
+                                    className={`h-14 w-14 rounded-full flex items-center justify-center border transition-all duration-300 ${isFav ? 'border-rose-500 bg-rose-50 text-rose-500' : 'border-gray-300 hover:border-gray-900 text-gray-400 hover:text-gray-900'}`}
+                                >
+                                    <HeartIcon className="w-6 h-6" solid={isFav} />
+                                </button>
                             </div>
 
-                            {/* Info Tabs */}
-                            <div className="pt-4 lg:pt-8">
-                                <div className="flex border-b border-gray-100 dark:border-gray-800 mb-6 overflow-x-auto no-scrollbar">
-                                    {[{id: 'description', label: 'Détails'}, {id: 'ingredients', label: 'Composition'}, {id: 'shipping', label: 'Livraison'}].map((tab) => (
-                                        <button
-                                            key={tab.id}
-                                            onClick={() => setActiveTab(tab.id as Tab)}
-                                            className={`pb-3 px-4 text-xs lg:text-sm font-bold uppercase tracking-widest transition-all whitespace-nowrap relative ${activeTab === tab.id ? 'text-gray-900 dark:text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                                        >
-                                            {tab.label}
-                                            {activeTab === tab.id && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-900 dark:bg-white"></span>}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <div className="min-h-[100px] animate-fadeIn text-sm lg:text-base text-gray-600 dark:text-gray-300 font-light leading-relaxed">
-                                    {activeTab === 'description' && (
-                                        <>
-                                            <p className="mb-4">{product.description || "Description détaillée à venir."}</p>
-                                            <p className="text-xs text-gray-400">REF: {product.id}</p>
-                                        </>
-                                    )}
-                                    
-                                    {activeTab === 'ingredients' && (
-                                        (product.specifications && product.specifications.length > 0) ? (
-                                            <ul className="space-y-2">
-                                                {product.specifications.map((spec, idx) => (
-                                                    <li key={idx} className="flex justify-between border-b border-gray-50 dark:border-gray-800 pb-2">
-                                                        <span className="text-xs uppercase tracking-wide text-gray-500">{spec.name}</span>
-                                                        <span className="font-serif italic">{spec.value}</span>
+                            {/* --- ACCORDIONS ÉLÉGANTS --- */}
+                            <div className="border-t border-gray-200 dark:border-gray-800 mt-2">
+                                <DetailAccordion title="Détails du produit" isOpen={activeTab === 'details'} onClick={() => setActiveTab(activeTab === 'details' ? '' : 'details' as any)}>
+                                    <div className="space-y-4 text-sm text-gray-600 dark:text-gray-400 font-light">
+                                        <p>{product.description}</p>
+                                        {product.specifications && (
+                                            <ul className="grid grid-cols-2 gap-4 mt-4">
+                                                {product.specifications.map((spec, i) => (
+                                                    <li key={i} className="flex flex-col">
+                                                        <span className="font-bold text-gray-900 dark:text-white text-xs uppercase mb-1">{spec.name}</span>
+                                                        <span>{spec.value}</span>
                                                     </li>
                                                 ))}
                                             </ul>
-                                        ) : <p className="italic text-gray-400">Ingrédients non listés.</p>
-                                    )}
+                                        )}
+                                    </div>
+                                </DetailAccordion>
+                                
+                                <DetailAccordion title="Conseils d'utilisation" isOpen={activeTab === 'usage'} onClick={() => setActiveTab(activeTab === 'usage' ? '' : 'usage' as any)}>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 font-light leading-relaxed">
+                                        Appliquez une petite quantité sur une peau propre et sèche. Massez doucement jusqu'à absorption complète. Pour un résultat optimal, utilisez matin et soir.
+                                    </p>
+                                </DetailAccordion>
 
-                                    {activeTab === 'shipping' && (
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-3"><CheckCircleIcon className="w-5 h-5 text-green-500" /> Livraison offerte dès 300 DT</div>
-                                            <div className="flex items-center gap-3"><CheckCircleIcon className="w-5 h-5 text-green-500" /> Expédition 24/48h</div>
-                                        </div>
-                                    )}
-                                </div>
+                                <DetailAccordion title="Livraison & Retours" isOpen={false} onClick={() => {}}>
+                                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                                        <span className="flex items-center gap-2"><CheckCircleIcon className="w-4 h-4 text-green-500"/> Expédition 24h</span>
+                                        <span className="flex items-center gap-2"><CheckCircleIcon className="w-4 h-4 text-green-500"/> Retour gratuit 14j</span>
+                                    </div>
+                                </DetailAccordion>
                             </div>
+
+                            {/* "Why We Love It" Section (Editorial Block) */}
+                            {product.highlights && (
+                                <div className="mt-16 bg-white dark:bg-gray-800 rounded-3xl p-8 lg:p-12 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-rose-100 dark:bg-rose-900/30 rounded-bl-full -mr-16 -mt-16 z-0"></div>
+                                    <div className="relative z-10 flex gap-6 items-start">
+                                        <div className="p-3 bg-black dark:bg-white text-white dark:text-black rounded-full flex-shrink-0">
+                                            <SparklesIcon className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-2xl font-serif font-bold mb-4">{product.highlights.title || "Le mot de l'experte"}</h3>
+                                            <div className="space-y-6">
+                                                {product.highlights.sections.map((section, idx) => (
+                                                    <div key={idx}>
+                                                        <h4 className="font-bold text-rose-500 text-sm uppercase tracking-wider mb-2">{section.subtitle}</h4>
+                                                        <ul className="space-y-2">
+                                                            {section.features.map((feature, fIdx) => (
+                                                                <li key={fIdx} className="text-gray-600 dark:text-gray-300 font-light text-sm">
+                                                                    • <span className="font-medium text-gray-900 dark:text-white">{feature.title}</span> : {feature.description}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                         </div>
                     </div>
-                </div>
 
-                {/* --- BLOC ÉDITORIAL DYNAMIQUE "WHY WE LOVE IT" --- */}
-                {product.highlights && (
-                    <div className="px-6 lg:px-0">
-                        <ProductHighlights highlights={product.highlights} />
+                    {/* --- REVIEWS & RECOMMENDATIONS --- */}
+                    <div className="mt-32">
+                        <ReviewsSection targetId={product.id as number} targetType="product" />
                     </div>
-                )}
 
-                {/* Reviews Section */}
-                <ReviewsSection targetId={product.id} targetType="product" />
-
-                {/* Similar Products */}
-                <div className="mt-20 pt-12 border-t border-gray-100 dark:border-gray-800 px-6 lg:px-0">
-                    <h2 className="text-2xl lg:text-3xl font-serif text-gray-900 dark:text-white text-center mb-10">Vous aimerez aussi</h2>
-                    {similarProducts.length > 0 && (
-                        <ProductCarousel title="" products={similarProducts} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
-                    )}
+                    <div className="mt-24">
+                        <div className="text-center mb-12">
+                            <span className="text-xs font-bold text-rose-500 uppercase tracking-[0.2em]">Complétez votre routine</span>
+                            <h2 className="text-3xl md:text-4xl font-serif font-medium mt-3">Vous aimerez aussi</h2>
+                        </div>
+                        {similarProducts.length > 0 && (
+                            <ProductCarousel title="" products={similarProducts} onPreview={onPreview} onNavigateToProductDetail={onNavigateToProductDetail} />
+                        )}
+                    </div>
                 </div>
+            </div>
+            
+            <style>{`
+                @keyframes blob {
+                    0% { transform: translate(0px, 0px) scale(1); }
+                    33% { transform: translate(30px, -50px) scale(1.1); }
+                    66% { transform: translate(-20px, 20px) scale(0.9); }
+                    100% { transform: translate(0px, 0px) scale(1); }
+                }
+                .animate-blob {
+                    animation: blob 7s infinite;
+                }
+                .animation-delay-2000 {
+                    animation-delay: 2s;
+                }
+                .no-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+                .no-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+            `}</style>
+        </div>
+    );
+};
+
+const DetailAccordion: React.FC<{ title: string; isOpen: boolean; onClick: () => void; children: React.ReactNode }> = ({ title, isOpen, onClick, children }) => {
+    return (
+        <div className="border-b border-gray-200 dark:border-gray-800">
+            <button 
+                onClick={onClick}
+                className="w-full flex justify-between items-center py-6 text-left group"
+            >
+                <span className="font-serif text-lg text-gray-900 dark:text-white group-hover:text-rose-600 transition-colors">{title}</span>
+                <span className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-rose-600' : 'text-gray-400'}`}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M6 9L12 15L18 9" />
+                    </svg>
+                </span>
+            </button>
+            <div 
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-96 opacity-100 pb-6' : 'max-h-0 opacity-0'}`}
+            >
+                {children}
             </div>
         </div>
     );

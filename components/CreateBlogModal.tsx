@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { XMarkIcon, PencilIcon } from './IconComponents';
 import { ImageInput } from './ImageInput';
+import { useToast } from './ToastContext';
 
 interface CreateBlogModalProps {
     isOpen: boolean;
@@ -10,6 +11,7 @@ interface CreateBlogModalProps {
 }
 
 export const CreateBlogModal: React.FC<CreateBlogModalProps> = ({ isOpen, onClose, onSave }) => {
+    const { addToast } = useToast();
     const [formData, setFormData] = useState({
         title: '',
         category: '',
@@ -31,8 +33,29 @@ export const CreateBlogModal: React.FC<CreateBlogModalProps> = ({ isOpen, onClos
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Manual validation
+        if (!formData.title.trim()) {
+            addToast("Le titre est obligatoire", "error");
+            return;
+        }
+        if (!formData.imageUrl.trim()) {
+            addToast("L'image de couverture est obligatoire", "error");
+            return;
+        }
+        if (!formData.category) {
+            addToast("Veuillez choisir une catégorie", "error");
+            return;
+        }
+        if (!formData.content.trim()) {
+            addToast("Le contenu de l'article est vide", "error");
+            return;
+        }
+
         onSave(formData);
         onClose();
+        // Reset form
+        setFormData({ title: '', category: '', excerpt: '', content: '', imageUrl: '' });
     };
 
     if (!isOpen) return null;
@@ -52,7 +75,7 @@ export const CreateBlogModal: React.FC<CreateBlogModalProps> = ({ isOpen, onClos
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-8 custom-scrollbar">
+                <form className="flex-grow overflow-y-auto p-8 custom-scrollbar">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                         
                         {/* Left Column: Visuals & Meta */}
@@ -60,7 +83,8 @@ export const CreateBlogModal: React.FC<CreateBlogModalProps> = ({ isOpen, onClos
                             <div className="space-y-2">
                                 <label className="text-xs font-bold uppercase tracking-widest text-rose-500">Image de couverture</label>
                                 <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-rose-300 transition-colors">
-                                    <ImageInput label="" value={formData.imageUrl} onChange={handleImageChange} required />
+                                    {/* Removing 'required' from ImageInput component props to handle it manually */}
+                                    <ImageInput label="" value={formData.imageUrl} onChange={handleImageChange} />
                                 </div>
                             </div>
 
@@ -72,7 +96,6 @@ export const CreateBlogModal: React.FC<CreateBlogModalProps> = ({ isOpen, onClos
                                         placeholder="Titre de votre article..." 
                                         value={formData.title} 
                                         onChange={handleChange}
-                                        required
                                         className="w-full bg-transparent text-2xl font-serif font-bold border-b border-gray-200 dark:border-gray-700 py-2 focus:outline-none focus:border-rose-500 transition-colors placeholder:text-gray-300 dark:placeholder:text-gray-700 text-gray-900 dark:text-white"
                                     />
                                 </div>
@@ -120,7 +143,6 @@ export const CreateBlogModal: React.FC<CreateBlogModalProps> = ({ isOpen, onClos
                                 placeholder="Écrivez votre contenu ici..." 
                                 value={formData.content} 
                                 onChange={handleChange}
-                                required
                                 className="flex-grow w-full bg-white dark:bg-gray-900 border-none p-0 text-lg font-light leading-relaxed text-gray-800 dark:text-gray-200 focus:ring-0 resize-none placeholder:text-gray-300 dark:placeholder:text-gray-700 h-full"
                             ></textarea>
                         </div>
@@ -132,7 +154,7 @@ export const CreateBlogModal: React.FC<CreateBlogModalProps> = ({ isOpen, onClos
                     <button onClick={onClose} className="px-8 py-3 rounded-full text-gray-500 font-bold uppercase text-xs tracking-wider hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                         Annuler
                     </button>
-                    <button onClick={handleSubmit} className="px-8 py-3 rounded-full bg-rose-600 text-white font-bold uppercase text-xs tracking-wider shadow-lg shadow-rose-500/30 hover:bg-rose-700 hover:scale-105 transition-all flex items-center gap-2">
+                    <button type="button" onClick={handleSubmit} className="px-8 py-3 rounded-full bg-rose-600 text-white font-bold uppercase text-xs tracking-wider shadow-lg shadow-rose-500/30 hover:bg-rose-700 hover:scale-105 transition-all flex items-center gap-2">
                         <PencilIcon className="w-4 h-4" />
                         Publier l'article
                     </button>

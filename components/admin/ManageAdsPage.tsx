@@ -89,7 +89,7 @@ export const ManageAdsPage: React.FC<ManageAdsPageProps> = ({ initialAds, onSave
                         <HeroSection slides={currentAds.heroSlides} />
                     </EditableAdWrapper>
                     
-                    <TrustBadges />
+                    <TrustBadges badges={currentAds.trustBadges} />
 
                     <ProductCarousel 
                         title="Nouvelles Arrivées (Aperçu non-éditable)" 

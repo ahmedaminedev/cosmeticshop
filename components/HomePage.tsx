@@ -104,7 +104,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 {accessoryProducts.length > 0 && (
                     <EditorialProductList 
                         title="Accessoires"
-                        products={accessoryProducts}
+                        products={accessoryProducts} 
                         onPreview={onPreview}
                         onNavigateToProductDetail={onNavigateToProductDetail}
                     />
@@ -132,15 +132,15 @@ export const HomePage: React.FC<HomePageProps> = ({
                     />
                 )}
                 
+                {/* Virtual Try-On Block moved up */}
+                <VirtualTryOnSection config={advertisements.virtualTryOn} />
+
                 <ProductGridSection 
                     allProducts={products} 
                     onPreview={onPreview} 
                     onNavigateToProductDetail={onNavigateToProductDetail}
                     config={advertisements.featuredGrid}
                 />
-                
-                {/* Virtual Try-On Block */}
-                <VirtualTryOnSection config={advertisements.virtualTryOn} />
                 
                 <BrandCarousel brands={brands} />
             </main>

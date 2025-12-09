@@ -35,7 +35,19 @@ export const ManageHomePage: React.FC<ManageHomePageProps> = ({ initialAds, onSa
     const { addToast } = useToast();
 
     useEffect(() => {
-        setAdsConfig(initialAds);
+        // Automatically populate trustBadges with defaults if missing to ensure they are editable
+        // This fixes the "il n'ya rien dans Badges de Confiance" issue
+        if (!initialAds.trustBadges || initialAds.trustBadges.length === 0) {
+            const defaultBadges = [
+                { id: 1, title: 'Livraison Rapide', subtitle: 'Sur toute la Tunisie' },
+                { id: 2, title: 'Paiement Sécurisé', subtitle: '100% sécurisé' },
+                { id: 3, title: 'Service Client', subtitle: 'A votre écoute 7j/7' },
+                { id: 4, title: 'Garantie', subtitle: 'Produits authentiques' }
+            ];
+            setAdsConfig(prev => ({ ...prev, trustBadges: defaultBadges }));
+        } else {
+            setAdsConfig(initialAds);
+        }
     }, [initialAds]);
 
     const handleUpdateConfig = (sectionKey: string, data: any) => {
@@ -103,48 +115,42 @@ export const ManageHomePage: React.FC<ManageHomePageProps> = ({ initialAds, onSa
         return allProducts.slice(8, 16); // Fallback
     }, [allProducts, adsConfig.summerSelection]);
 
-    const renderPreviewContent = (interactive: boolean) => {
-        const Wrapper = ({ children, section, label }: { children: React.ReactNode, section: string, label: string }) => {
-            if (interactive) {
-                return (
-                    <SelectableWrapper
-                        isActive={activeSection === section}
-                        onClick={() => setActiveSection(section)}
-                        label={label}
-                    >
-                        {children}
-                    </SelectableWrapper>
-                );
-            }
-            return <div>{children}</div>;
-        };
+    const renderSection = (section: string, label: string, content: React.ReactNode, interactive: boolean) => {
+        if (interactive) {
+            return (
+                <SelectableWrapper
+                    isActive={activeSection === section}
+                    onClick={() => setActiveSection(section)}
+                    label={label}
+                >
+                    {content}
+                </SelectableWrapper>
+            );
+        }
+        return <div>{content}</div>;
+    };
 
+    const renderPreviewContent = (interactive: boolean) => {
         return (
             <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 bg-[#FAFAFA] dark:bg-gray-950 min-h-screen">
-                <Wrapper section="hero" label="Carrousel Principal">
-                    <HeroSection slides={adsConfig.heroSlides} />
-                </Wrapper>
+                {renderSection('hero', 'Carrousel Principal', <HeroSection slides={adsConfig.heroSlides} />, interactive)}
                 
                 <div className="my-8">
-                    <Wrapper section="trustBadges" label="Badges de Confiance">
-                        <TrustBadges badges={adsConfig.trustBadges} />
-                    </Wrapper>
+                    {renderSection('trustBadges', 'Badges de Confiance', <TrustBadges badges={adsConfig.trustBadges} />, interactive)}
                 </div>
 
                 <div className="my-12">
-                    <Wrapper section="newArrivals" label="Carrousel Nouvelles Arrivées">
+                    {renderSection('newArrivals', 'Carrousel Nouvelles Arrivées', (
                         <ProductCarousel 
                             title={adsConfig.newArrivals?.title || "Nouvelles Arrivées"} 
                             products={newArrivalProducts} 
                             onPreview={() => {}} 
                             onNavigateToProductDetail={() => {}} 
                         />
-                    </Wrapper>
+                    ), interactive)}
                 </div>
 
-                <Wrapper section="audioPromo" label="Bannière Audio">
-                    <AudioPromoBanner ads={adsConfig.audioPromo} />
-                </Wrapper>
+                {renderSection('audioPromo', 'Bannière Audio', <AudioPromoBanner ads={adsConfig.audioPromo} />, interactive)}
 
                 {/* Editorial Product List Placeholder - Could be made editable in future */}
                 <div className="my-16 text-center text-gray-400 italic border-y py-4">
@@ -152,47 +158,37 @@ export const ManageHomePage: React.FC<ManageHomePageProps> = ({ initialAds, onSa
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
-                    <Wrapper section="promoBanner1" label="Bannière Gauche">
-                        <MediumPromoBanner banner={adsConfig.promoBanners[0]} isPreview allProducts={allProducts} allPacks={allPacks} onPreview={() => {}} />
-                    </Wrapper>
-                    <Wrapper section="promoBanner2" label="Bannière Droite">
-                        <MediumPromoBanner banner={adsConfig.promoBanners[1]} isPreview allProducts={allProducts} allPacks={allPacks} onPreview={() => {}} />
-                    </Wrapper>
+                    {renderSection('promoBanner1', 'Bannière Gauche', <MediumPromoBanner banner={adsConfig.promoBanners[0]} isPreview allProducts={allProducts} allPacks={allPacks} onPreview={() => {}} />, interactive)}
+                    {renderSection('promoBanner2', 'Bannière Droite', <MediumPromoBanner banner={adsConfig.promoBanners[1]} isPreview allProducts={allProducts} allPacks={allPacks} onPreview={() => {}} />, interactive)}
                 </div>
 
-                <Wrapper section="shoppableVideos" label="Vidéos Shopping (Reels)">
-                    <ShoppableVideoCarousel videos={adsConfig.shoppableVideos || []} isPreview />
-                </Wrapper>
+                {renderSection('shoppableVideos', 'Vidéos Shopping (Reels)', <ShoppableVideoCarousel videos={adsConfig.shoppableVideos || []} isPreview />, interactive)}
 
-                <Wrapper section="editorialCollage" label="Collage Éditorial">
-                    <EditorialMasonry items={adsConfig.editorialCollage || []} isPreview />
-                </Wrapper>
+                {renderSection('editorialCollage', 'Collage Éditorial', <EditorialMasonry items={adsConfig.editorialCollage || []} isPreview />, interactive)}
 
                 <div className="my-12">
-                    <Wrapper section="summerSelection" label="Carrousel Sélection Été">
+                    {renderSection('summerSelection', 'Carrousel Sélection Été', (
                         <ProductCarousel 
                             title={adsConfig.summerSelection?.title || "Sélection d'été"} 
                             products={summerSelectionProducts} 
                             onPreview={() => {}} 
                             onNavigateToProductDetail={() => {}} 
                         />
-                    </Wrapper>
+                    ), interactive)}
                 </div>
 
-                <Wrapper section="featuredGrid" label="Grille Produits (Sélection)">
+                <div className="my-16">
+                    {renderSection('virtualTryOn', 'Bloc Virtual Try-On', <VirtualTryOnSection config={adsConfig.virtualTryOn} />, interactive)}
+                </div>
+
+                {renderSection('featuredGrid', 'Grille Produits (Sélection)', (
                     <ProductGridSection 
                         allProducts={allProducts} 
                         onPreview={() => {}} 
                         onNavigateToProductDetail={() => {}} 
                         config={adsConfig.featuredGrid}
                     />
-                </Wrapper>
-
-                <div className="my-16">
-                    <Wrapper section="virtualTryOn" label="Bloc Virtual Try-On">
-                        <VirtualTryOnSection config={adsConfig.virtualTryOn} />
-                    </Wrapper>
-                </div>
+                ), interactive)}
                 
                 <div className="my-12 text-center text-gray-400 italic">
                     [Carrousel Marques Automatique]

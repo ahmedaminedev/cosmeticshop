@@ -53,13 +53,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ slides }) => {
                     {/* Gradient Overlay & Content */}
                     <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col justify-center items-start p-12 lg:p-24">
                         <div className="max-w-2xl animate-fade-in-up">
-                            <h1 className="text-5xl lg:text-7xl font-serif font-bold text-white mb-6 leading-tight drop-shadow-md tracking-wide" style={{ opacity: index === currentSlide ? 1 : 0, transform: index === currentSlide ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.8s ease 0.2s' }}>
-                                {slide.title}
+                            <h1 
+                                className="text-5xl lg:text-7xl font-serif font-bold text-white mb-6 leading-tight drop-shadow-md tracking-wide" 
+                                style={{ opacity: index === currentSlide ? 1 : 0, transform: index === currentSlide ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.8s ease 0.2s' }}
+                                dangerouslySetInnerHTML={{ __html: slide.title }}
+                            >
                             </h1>
-                            <p className="text-xl lg:text-2xl text-white/90 mb-8 font-light tracking-wide" style={{ opacity: index === currentSlide ? 1 : 0, transform: index === currentSlide ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.8s ease 0.4s' }}>
-                                {slide.subtitle}
+                            <p 
+                                className="text-xl lg:text-2xl text-white/90 mb-8 font-light tracking-wide" 
+                                style={{ opacity: index === currentSlide ? 1 : 0, transform: index === currentSlide ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.8s ease 0.4s' }}
+                                dangerouslySetInnerHTML={{ __html: slide.subtitle }}
+                            >
                             </p>
-                            <a href="#" className="inline-block bg-white text-gray-900 font-semibold py-4 px-10 rounded-full hover:bg-rose-50 transition-all duration-300 transform hover:scale-105 shadow-lg tracking-wider uppercase text-sm" style={{ opacity: index === currentSlide ? 1 : 0, transform: index === currentSlide ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.8s ease 0.6s' }}>
+                            <a 
+                                href={slide.link || "#"} 
+                                className="inline-block bg-white text-gray-900 font-semibold py-4 px-10 rounded-full hover:bg-rose-50 transition-all duration-300 transform hover:scale-105 shadow-lg tracking-wider uppercase text-sm cursor-pointer z-50" 
+                                style={{ opacity: index === currentSlide ? 1 : 0, transform: index === currentSlide ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.8s ease 0.6s' }}
+                            >
                                 {slide.buttonText}
                             </a>
                         </div>

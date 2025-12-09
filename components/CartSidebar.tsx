@@ -37,7 +37,15 @@ const CartItemRow: React.FC<CartItemRowProps> = ({ item }) => {
                             <TrashIcon className="w-4 h-4" />
                         </button>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Quantité: {item.quantity}</p>
+                    <div className="mt-1 flex flex-col gap-0.5">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Quantité: {item.quantity}</p>
+                        {item.selectedColor && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Nuance:</span>
+                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{item.selectedColor}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
                 
                 <div className="flex items-center justify-between mt-auto">

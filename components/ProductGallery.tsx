@@ -5,9 +5,10 @@ import { PhotoIcon } from './IconComponents';
 interface ProductGalleryProps {
     images: string[];
     productName: string;
+    isHeroMode?: boolean; // Prop pour désactiver le wrapper si géré par la page parente
 }
 
-export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productName }) => {
+export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productName, isHeroMode = false }) => {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [showZoom, setShowZoom] = useState(false);
     const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
@@ -34,6 +35,24 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
         setCursorPos({ x, y });
     };
 
+    if (isHeroMode) {
+        // En mode Hero, on rend juste les miniatures si nécessaire, l'image principale est gérée par le parent pour l'effet 3D
+        if (!hasMultipleImages) return null;
+        return (
+             <div className="flex justify-center gap-4 mt-8 overflow-x-auto py-2 no-scrollbar">
+                {validImages.map((img, idx) => (
+                    <button
+                        key={idx}
+                        onClick={() => setSelectedImageIndex(idx)}
+                        className={`w-16 h-16 rounded-2xl border-2 shadow-lg overflow-hidden transition-transform hover:scale-110 focus:ring-2 focus:ring-rose-400 ${selectedImageIndex === idx ? 'border-rose-500 ring-2 ring-rose-200' : 'border-white dark:border-gray-700'}`}
+                    >
+                        <img src={img} className="w-full h-full object-cover" alt={`${productName} thumbnail ${idx}`} />
+                    </button>
+                ))}
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col gap-6 w-full">
             {/* Main Image Area - Fixed Size Frame */}
@@ -54,7 +73,7 @@ export const ProductGallery: React.FC<ProductGalleryProps> = ({ images, productN
                             <img 
                                 src={activeImage} 
                                 alt={productName} 
-                                className="absolute inset-0 w-full h-full"
+                                className="absolute inset-0 w-full h-full object-contain"
                             />
                             
                             {/* Internal Zoom Lens Effect */}

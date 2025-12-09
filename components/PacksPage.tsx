@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Pack, Product, Category } from '../types';
 import { Breadcrumb } from './Breadcrumb';
-import { ShoppingBagIcon, Squares2X2Icon, Bars3Icon, ChevronDownIcon } from './IconComponents';
+import { ShoppingBagIcon, Squares2X2Icon, Bars3Icon, ChevronDownIcon, SparklesIcon, AdjustmentsHorizontalIcon, XMarkIcon } from './IconComponents';
 import { FiltersSidebar } from './FiltersSidebar';
 import { useCart } from './CartContext';
 
@@ -20,17 +20,7 @@ interface PacksPageProps {
 const isPackAvailable = (pack: Pack, allProducts: Product[], allPacks: Pack[]): boolean => {
     for (const productId of pack.includedProductIds) {
         const product = allProducts.find(p => p.id === productId);
-        if (!product || product.quantity === 0) {
-            return false;
-        }
-    }
-    if (pack.includedPackIds) {
-        for (const subPackId of pack.includedPackIds) {
-            const subPack = allPacks.find(p => p.id === subPackId);
-            if (!subPack || !isPackAvailable(subPack, allProducts, allPacks)) {
-                return false;
-            }
-        }
+        if (!product || product.quantity === 0) return false;
     }
     return true;
 };
@@ -40,72 +30,76 @@ const PackCard: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pack[];
     const savings = pack.oldPrice - pack.price;
     const isAvailable = useMemo(() => isPackAvailable(pack, allProducts, allPacks), [pack, allProducts, allPacks]);
 
-    const handleAddToCart = () => {
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (!isAvailable) return;
         addToCart(pack);
         openCart();
     };
     
-    const includedProducts = pack.includedProductIds.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
-    const includedPacks = (pack.includedPackIds || []).map(id => allPacks.find(p => p.id === id)).filter(Boolean);
-
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full hover:-translate-y-1">
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToPackDetail(pack.id); }} className="relative block h-64 overflow-hidden">
+        <div 
+            onClick={() => onNavigateToPackDetail(pack.id)}
+            className="group bg-white dark:bg-gray-800 rounded-[2rem] shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 overflow-hidden border border-transparent hover:border-rose-100 dark:hover:border-gray-700 h-full flex flex-col cursor-pointer transform hover:-translate-y-2"
+        >
+            <div className="relative h-72 overflow-hidden">
                 <img 
                     src={pack.imageUrl} 
                     alt={pack.name} 
-                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${!isAvailable ? 'grayscale opacity-70' : ''}`}
+                    className={`w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 ${!isAvailable ? 'grayscale opacity-80' : ''}`}
                 />
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6">
-                    <h3 className="text-2xl font-serif font-bold text-white leading-tight">{pack.name}</h3>
+                
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80"></div>
+                
+                <div className="absolute bottom-0 left-0 p-6 w-full">
+                    <h3 className="text-2xl font-serif font-bold text-white leading-tight drop-shadow-md group-hover:text-rose-200 transition-colors">{pack.name}</h3>
+                    <p className="text-white/80 text-sm mt-2 line-clamp-2 font-light">{pack.description}</p>
                 </div>
-                 {!isAvailable && (
-                    <span className="absolute top-4 right-4 bg-gray-800/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                        Rupture
+
+                {/* Badges */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                    <span className="bg-white/90 backdrop-blur text-rose-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
+                        Coffret
                     </span>
-                )}
-            </a>
+                    {!isAvailable && (
+                        <span className="bg-gray-900/90 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                            Rupture
+                        </span>
+                    )}
+                </div>
+                
+                {/* Savings Badge */}
+                <div className="absolute top-4 right-4 bg-rose-500 text-white w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-lg border-2 border-white/20">
+                    <span className="text-xs font-bold">SAVE</span>
+                    <span className="text-sm font-bold">{Math.round((savings / pack.oldPrice) * 100)}%</span>
+                </div>
+            </div>
 
-            <div className="p-6 flex flex-col flex-grow">
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 flex-grow font-light leading-relaxed">{pack.description}</p>
-
-                <div className="mb-6">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Ce coffret contient</h4>
-                    <ul className="space-y-2">
-                        {includedPacks.map((item, index) => (
-                             <li key={`subpack-${index}`} className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                                <span className="w-1.5 h-1.5 bg-rose-400 rounded-full mr-3 shrink-0"></span>
-                                <span className="font-semibold text-rose-500 mr-1">[Set]</span> {item.name}
-                            </li>
+            <div className="p-6 flex flex-col flex-grow bg-white dark:bg-gray-800">
+                <div className="mb-6 space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                        {pack.includedItems.slice(0, 3).map((item, idx) => (
+                            <span key={idx} className="text-[10px] uppercase font-bold tracking-wider text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                {item}
+                            </span>
                         ))}
-                        {includedProducts.map((item, index) => (
-                            <li key={`product-${index}`} className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                                <span className={`w-1.5 h-1.5 rounded-full mr-3 shrink-0 ${item.quantity > 0 ? 'bg-gray-400' : 'bg-red-400'}`}></span>
-                                {item.name} {item.quantity === 0 && <span className="text-[10px] text-red-500 ml-2 font-bold uppercase">Épuisé</span>}
-                            </li>
-                        ))}
-                    </ul>
+                        {pack.includedItems.length > 3 && <span className="text-xs text-gray-400">+{pack.includedItems.length - 3}</span>}
+                    </div>
                 </div>
 
-                <div className="mt-auto pt-6 border-t border-gray-100 dark:border-gray-700">
-                    <div className="flex justify-between items-center mb-4">
-                         <div className="flex flex-col">
-                            <span className="text-2xl font-bold text-gray-900 dark:text-white">{pack.price.toFixed(0)} DT</span>
-                            <span className="text-sm text-gray-400 line-through">{pack.oldPrice.toFixed(0)} DT</span>
-                        </div>
-                         <div className="bg-rose-50 text-rose-600 text-xs font-bold px-3 py-1.5 rounded-md uppercase tracking-wider">
-                            -{(savings / pack.oldPrice * 100).toFixed(0)}%
-                        </div>
+                <div className="mt-auto pt-6 border-t border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <div>
+                        <span className="block text-sm text-gray-400 line-through mb-0.5">{pack.oldPrice.toFixed(0)} DT</span>
+                        <span className="block text-2xl font-serif font-bold text-gray-900 dark:text-white">{pack.price.toFixed(0)} <span className="text-base font-sans font-light text-gray-500">DT</span></span>
                     </div>
 
                     <button 
                         onClick={handleAddToCart}
                         disabled={!isAvailable}
-                        className="w-full bg-black dark:bg-white text-white dark:text-black font-bold uppercase tracking-widest text-xs py-3.5 rounded-full hover:bg-rose-600 dark:hover:bg-rose-500 dark:hover:text-white transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:shadow-none disabled:cursor-not-allowed"
+                        className="w-12 h-12 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center hover:scale-110 hover:bg-rose-600 dark:hover:bg-rose-500 dark:hover:text-white transition-all shadow-lg disabled:bg-gray-300 disabled:scale-100 disabled:cursor-not-allowed"
                     >
-                        <ShoppingBagIcon className="w-4 h-4" />
-                        <span>{isAvailable ? 'Ajouter au sac' : 'Indisponible'}</span>
+                        <ShoppingBagIcon className="w-5 h-5" />
                     </button>
                 </div>
             </div>
@@ -117,53 +111,45 @@ const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pac
     const { addToCart, openCart } = useCart();
     const isAvailable = useMemo(() => isPackAvailable(pack, allProducts, allPacks), [pack, allProducts, allPacks]);
 
-    const handleAddToCart = () => {
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (!isAvailable) return;
         addToCart(pack);
         openCart();
     };
 
-    const includedProducts = pack.includedProductIds.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
-    const includedPacks = (pack.includedPackIds || []).map(id => allPacks.find(p => p.id === id)).filter(Boolean);
-
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center p-4 gap-6 hover:shadow-md transition-shadow">
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToPackDetail(pack.id); }} className="relative flex-shrink-0 w-full md:w-48 aspect-square block rounded-lg overflow-hidden">
+        <div onClick={() => onNavigateToPackDetail(pack.id)} className="group bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 cursor-pointer flex flex-col md:flex-row items-center gap-6 overflow-hidden">
+            <div className="relative w-full md:w-64 h-64 md:h-48 flex-shrink-0 overflow-hidden rounded-2xl">
                 <img
                     src={pack.imageUrl}
                     alt={pack.name}
-                    className={`w-full h-full object-cover ${!isAvailable ? 'grayscale opacity-70' : ''}`}
+                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${!isAvailable ? 'grayscale opacity-70' : ''}`}
                 />
-            </a>
+            </div>
 
             <div className="flex-grow text-center md:text-left">
-                <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToPackDetail(pack.id); }} className="block">
-                    <h3 className="text-xl font-serif font-bold text-gray-900 dark:text-gray-100 mb-2 hover:text-rose-600 transition-colors">{pack.name}</h3>
-                </a>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{pack.description}</p>
+                <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-2 block">Coffret Exclusif</span>
+                <h3 className="text-2xl font-serif font-bold text-gray-900 dark:text-white mb-3 group-hover:text-rose-600 transition-colors">{pack.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 max-w-xl">{pack.description}</p>
                 <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                    {includedPacks.map((item, index) => (
-                         <span key={`subpack-${index}`} className="text-xs bg-rose-50 text-rose-700 px-2 py-1 rounded border border-rose-100">
-                            {item.name}
-                        </span>
-                    ))}
-                    {includedProducts.map((item, index) => (
-                        <span key={`product-${index}`} className={`text-xs px-2 py-1 rounded border ${item.quantity > 0 ? 'bg-gray-50 border-gray-100 text-gray-600' : 'bg-red-50 border-red-100 text-red-600'}`}>
-                            {item.name}
+                    {pack.includedItems.map((item, index) => (
+                         <span key={index} className="text-xs bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full border border-gray-100 dark:border-gray-600">
+                            {item}
                         </span>
                     ))}
                 </div>
             </div>
 
-            <div className="flex-shrink-0 w-full md:w-48 flex flex-col items-center md:items-end gap-3 border-t md:border-t-0 md:border-l border-gray-100 dark:border-gray-700 pt-4 md:pt-0 md:pl-6">
+            <div className="flex-shrink-0 w-full md:w-auto flex flex-col items-center md:items-end gap-4 p-4 md:border-l border-gray-100 dark:border-gray-700">
                 <div className="text-right">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{pack.price.toFixed(0)} DT</p>
                     <p className="text-sm text-gray-400 line-through">{pack.oldPrice.toFixed(0)} DT</p>
+                    <p className="text-3xl font-serif font-bold text-gray-900 dark:text-white">{pack.price.toFixed(0)} DT</p>
                 </div>
                 <button 
                     onClick={handleAddToCart}
                     disabled={!isAvailable}
-                    className="w-full bg-black dark:bg-white text-white dark:text-black font-bold uppercase text-xs py-3 rounded-lg hover:bg-rose-600 dark:hover:bg-rose-500 dark:hover:text-white transition-colors shadow-sm flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    className="w-full md:w-auto px-8 py-3 bg-black dark:bg-white text-white dark:text-black font-bold uppercase text-xs rounded-full hover:bg-rose-600 dark:hover:bg-rose-500 dark:hover:text-white transition-all shadow-lg flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                     <ShoppingBagIcon className="w-4 h-4" />
                     <span>{isAvailable ? 'Ajouter' : 'Indisponible'}</span>
@@ -174,58 +160,37 @@ const PackListItem: React.FC<{ pack: Pack; allProducts: Product[]; allPacks: Pac
 };
 
 export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigateToCategory, packs, allProducts, allPacks, onNavigateToPacks, onNavigateToPackDetail, categories }) => {
-    // ... logic remains same ...
     const [sortOrder, setSortOrder] = useState('price-asc');
     const [viewMode, setViewMode] = useState('grid');
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [filters, setFilters] = useState({
         price: { min: 0, max: 5000 },
         brands: [] as string[],
         materials: [] as string[],
     });
 
+    // Mock products in packs for filter consistency (as FiltersSidebar expects products)
+    // In a real scenario, you'd extract unique brands/prices from packs metadata directly
     const productsInPacks = useMemo(() => {
-        const productIds = new Set(packs.flatMap(p => p.includedProductIds));
-        return allProducts.filter(p => productIds.has(p.id));
-    }, [packs, allProducts]);
+        // Simplified: We just pass a dummy list that represents pack prices/brands for the filter logic
+        return packs.map(p => ({
+            id: p.id,
+            price: p.price,
+            brand: "Coffret", // Default brand for packs or extract from content
+            material: ""
+        }));
+    }, [packs]);
 
-    const maxPrice = useMemo(() =>
-        Math.ceil(packs.reduce((max, p) => p.price > max ? p.price : max, 0)) || 5000,
-        [packs]
-    );
+    const maxPrice = useMemo(() => Math.ceil(packs.reduce((max, p) => p.price > max ? p.price : max, 0)) || 5000, [packs]);
 
     useEffect(() => {
         document.title = `Nos Coffrets - Cosmetics Shop`;
-        const newMaxPrice = Math.ceil(packs.reduce((max, p) => p.price > max ? p.price : max, 0)) || 5000;
-        setFilters({
-            price: { min: 0, max: newMaxPrice },
-            brands: [],
-            materials: [],
-        });
+        setFilters(prev => ({ ...prev, price: { ...prev.price, max: maxPrice } }));
     }, [packs]);
     
     const displayedPacks = useMemo(() => {
-        let filtered = [...packs]
-            .filter(p => p.price >= filters.price.min && p.price <= filters.price.max);
+        let filtered = [...packs].filter(p => p.price >= filters.price.min && p.price <= filters.price.max);
         
-        // ... filtering logic ...
-        if (filters.brands.length > 0) {
-            filtered = filtered.filter(pack => 
-                pack.includedProductIds.some(productId => {
-                    const product = allProducts.find(p => p.id === productId);
-                    return product && filters.brands.includes(product.brand);
-                })
-            );
-        }
-
-        if (filters.materials.length > 0) {
-             filtered = filtered.filter(pack => 
-                pack.includedProductIds.some(productId => {
-                    const product = allProducts.find(p => p.id === productId);
-                    return product && product.material && filters.materials.includes(product.material);
-                })
-            );
-        }
-
         filtered.sort((a, b) => {
             switch (sortOrder) {
                 case 'price-asc': return a.price - b.price;
@@ -236,77 +201,117 @@ export const PacksPage: React.FC<PacksPageProps> = ({ onNavigateHome, onNavigate
         });
         
         return filtered;
-    }, [packs, filters, sortOrder, allProducts]);
+    }, [packs, filters, sortOrder]);
     
     const gridClasses = viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1';
 
     return (
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="flex flex-col lg:flex-row gap-12">
-                <div className="flex-1 min-w-0">
-                    <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: 'Coffrets & Packs' }]} />
-                    
-                    <div className="my-8 text-center lg:text-left">
-                        <h1 className="text-4xl font-serif font-bold text-gray-900 dark:text-gray-100">Coffrets Cadeaux</h1>
-                        <p className="text-gray-500 mt-2 font-light">Offrez le meilleur de la beauté avec nos sélections exclusives.</p>
-                    </div>
+        <div className="bg-[#FAFAFA] dark:bg-gray-950 min-h-screen relative overflow-hidden font-sans">
+             {/* Abstract BG */}
+             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-purple-100/20 dark:bg-purple-900/10 rounded-full blur-[150px]"></div>
+                <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-rose-100/20 dark:bg-rose-900/10 rounded-full blur-[150px]"></div>
+            </div>
 
-                    <div className="flex flex-col lg:flex-row gap-8">
+            {/* Header */}
+            <div className="relative z-10 pt-8 pb-12 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+                <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <Breadcrumb items={[{ name: 'Accueil', onClick: onNavigateHome }, { name: 'Coffrets & Packs' }]} />
+                    <div className="mt-8 text-center max-w-3xl mx-auto animate-fadeInUp">
+                        <span className="text-rose-500 font-bold uppercase tracking-[0.25em] text-xs mb-3 block">Idées Cadeaux</span>
+                        <h1 className="text-4xl md:text-6xl font-serif font-medium text-gray-900 dark:text-white mb-4">L'Art d'Offrir</h1>
+                        <p className="text-lg text-gray-500 dark:text-gray-400 font-light">Des assortiments d'exception pour faire plaisir ou se faire plaisir.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+                <div className="flex flex-col lg:flex-row gap-10">
+                    
+                    {/* Sidebar */}
+                    <div className={`
+                        fixed inset-0 z-50 bg-white dark:bg-gray-900 p-6 overflow-y-auto transition-transform duration-300 lg:translate-x-0 lg:static lg:bg-transparent lg:p-0 lg:overflow-visible lg:w-[300px] lg:block
+                        ${showMobileFilters ? 'translate-x-0' : '-translate-x-full'}
+                    `}>
+                        <div className="lg:hidden flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold">Filtres</h2>
+                            <button onClick={() => setShowMobileFilters(false)}><XMarkIcon className="w-6 h-6"/></button>
+                        </div>
+                        {/* We reuse FiltersSidebar but with simplified data for Packs since they don't share same structure strictly */}
                         <FiltersSidebar 
-                            products={productsInPacks}
+                            products={productsInPacks as any}
                             filters={filters}
                             onFilterChange={setFilters}
                             maxPrice={maxPrice}
                         />
+                    </div>
 
-                        <main className="flex-1">
-                            {/* Toolbar (View Mode, Sort) - Same as ProductListPage logic, reusing styling */}
-                            <div className="flex justify-between items-center mb-6 p-2">
-                                <div className="flex items-center gap-2">
-                                     <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white' : 'text-gray-400 hover:text-gray-600'}`} aria-label="Grid view"><Squares2X2Icon className="w-5 h-5"/></button>
-                                     <button onClick={() => setViewMode('list')} className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white' : 'text-gray-400 hover:text-gray-600'}`} aria-label="List view"><Bars3Icon className="w-5 h-5"/></button>
-                                </div>
+                    {/* Main Content */}
+                    <main className="flex-1 min-w-0">
+                        {/* Toolbar */}
+                        <div className="flex flex-wrap justify-between items-center mb-8 gap-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md p-2 rounded-2xl border border-white/40 dark:border-gray-700 shadow-sm">
+                             <button 
+                                onClick={() => setShowMobileFilters(true)}
+                                className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 rounded-xl text-sm font-bold shadow-sm"
+                            >
+                                <AdjustmentsHorizontalIcon className="w-5 h-5"/> Filtres
+                            </button>
 
-                                <div className="flex items-center gap-4">
-                                    <div className="relative group">
+                            <div className="flex items-center gap-4 ml-auto">
+                                <div className="relative group">
+                                    <div className="flex items-center gap-2 cursor-pointer px-4 py-2 rounded-xl hover:bg-white dark:hover:bg-gray-700 transition-colors">
                                         <select 
                                             value={sortOrder} 
                                             onChange={(e) => setSortOrder(e.target.value)} 
-                                            className="appearance-none bg-transparent pr-8 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 cursor-pointer focus:outline-none"
+                                            className="bg-transparent text-sm font-bold text-gray-900 dark:text-white focus:outline-none cursor-pointer appearance-none pr-4"
                                         >
                                             <option value="price-asc">Prix croissant</option>
                                             <option value="price-desc">Prix décroissant</option>
                                             <option value="name-asc">Nom (A-Z)</option>
                                         </select>
-                                        <ChevronDownIcon className="w-4 h-4 text-gray-400 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-gray-600" />
+                                        <ChevronDownIcon className="w-4 h-4 text-gray-400 pointer-events-none -ml-4" />
                                     </div>
+                                </div>
+
+                                <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+                                     <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow-sm text-rose-600' : 'text-gray-400 hover:text-gray-600'}`}><Squares2X2Icon className="w-5 h-5"/></button>
+                                     <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm text-rose-600' : 'text-gray-400 hover:text-gray-600'}`}><Bars3Icon className="w-5 h-5"/></button>
                                 </div>
                             </div>
-                            
-                            {displayedPacks.length > 0 ? (
-                                viewMode === 'list' ? (
-                                    <div className="space-y-6">
-                                        {displayedPacks.map(pack => (
-                                            <PackListItem key={pack.id} pack={pack} allProducts={allProducts} allPacks={allPacks} onNavigateToPackDetail={onNavigateToPackDetail} />
-                                        ))}
+                        </div>
+                        
+                        {displayedPacks.length > 0 ? (
+                            <div className={viewMode === 'list' ? 'space-y-6' : `grid ${gridClasses} gap-8`}>
+                                {displayedPacks.map((pack, index) => (
+                                    <div key={pack.id} className="animate-fadeInUp" style={{ animationDelay: `${index * 100}ms` }}>
+                                        {viewMode === 'list' ? (
+                                            <PackListItem pack={pack} allProducts={allProducts} allPacks={allPacks} onNavigateToPackDetail={onNavigateToPackDetail} />
+                                        ) : (
+                                            <PackCard pack={pack} allProducts={allProducts} allPacks={allPacks} onNavigateToPackDetail={onNavigateToPackDetail} />
+                                        )}
                                     </div>
-                                ) : (
-                                    <div className={`grid ${gridClasses} gap-8`}>
-                                        {displayedPacks.map(pack => (
-                                            <PackCard key={pack.id} pack={pack} allProducts={allProducts} allPacks={allPacks} onNavigateToPackDetail={onNavigateToPackDetail} />
-                                        ))}
-                                    </div>
-                                )
-                            ) : (
-                                <div className="text-center py-20 bg-gray-50 dark:bg-gray-900 rounded-xl">
-                                    <p className="text-lg text-gray-600 dark:text-gray-400">Aucun coffret trouvé.</p>
-                                    <button onClick={() => setFilters({price: {min: 0, max: maxPrice}, brands: [], materials: []})} className="mt-4 text-rose-600 font-bold underline hover:no-underline">Réinitialiser les filtres</button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-24 bg-white/50 dark:bg-gray-800/50 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
+                                <div className="w-20 h-20 bg-rose-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 text-rose-300">
+                                    <SparklesIcon className="w-10 h-10" />
                                 </div>
-                            )}
-                        </main>
-                    </div>
+                                <p className="text-xl font-serif text-gray-900 dark:text-white">Aucun coffret trouvé.</p>
+                                <button onClick={() => setFilters({price: {min: 0, max: maxPrice}, brands: [], materials: []})} className="mt-4 text-sm font-bold text-rose-600 underline">Réinitialiser les filtres</button>
+                            </div>
+                        )}
+                    </main>
                 </div>
             </div>
+            
+            <style>{`
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fadeInUp { animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+            `}</style>
         </div>
     );
 };

@@ -88,24 +88,23 @@ export const GlowRoutinePromo: React.FC<{ config?: OffersPageConfig['glowRoutine
                 <div className="w-full lg:w-1/2 flex flex-col justify-center items-center text-center p-12 lg:p-20 order-1 lg:order-2 bg-white dark:bg-gray-900">
                     <span 
                         className="text-sm font-sans tracking-[0.2em] uppercase mb-4"
-                        style={{ color: config.subtitleColor }}
                         dangerouslySetInnerHTML={{ __html: config.subtitle }}
                     >
                     </span>
                     
                     <h2 
                         className="text-5xl lg:text-7xl font-serif font-bold mb-8 leading-tight"
-                        style={{ color: config.titleColor }}
                         dangerouslySetInnerHTML={{ __html: config.title }}
                     >
                     </h2>
                     
-                    <button 
-                        className="px-10 py-4 rounded-full font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    <a 
+                        href={config.link || "#"}
+                        className="px-10 py-4 rounded-full font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 inline-block"
                         style={{ backgroundColor: config.buttonColor, color: config.buttonTextColor }}
                     >
                         {config.buttonText}
-                    </button>
+                    </a>
                 </div>
             </div>
         </section>
@@ -123,22 +122,21 @@ export const EssentialsBanner: React.FC<{ config?: OffersPageConfig['essentials'
                 <div className="w-full md:w-5/12 p-10 md:pl-20 md:py-20 z-10 text-center md:text-left">
                     <h2 
                         className="text-4xl md:text-5xl font-sans font-bold mb-4 tracking-tight"
-                        style={{ color: config.titleColor }}
                         dangerouslySetInnerHTML={{ __html: config.title }}
                     >
                     </h2>
                     <p 
                         className="text-lg md:text-xl font-medium mb-10"
-                        style={{ color: config.subtitleColor }}
                         dangerouslySetInnerHTML={{ __html: config.subtitle }}
                     >
                     </p>
-                    <button 
-                        className="px-12 py-4 rounded-full font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg"
+                    <a 
+                        href={config.link || "#"}
+                        className="px-12 py-4 rounded-full font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg inline-block"
                         style={{ backgroundColor: config.buttonColor, color: config.buttonTextColor }}
                     >
                         {config.buttonText}
-                    </button>
+                    </a>
                 </div>
 
                 {/* Center Badge (Absolute centered on desktop, static on mobile) */}
@@ -338,13 +336,11 @@ export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, 
                     <span className="text-rose-500 font-bold uppercase tracking-[0.25em] text-xs mb-3 block">Sélection Exclusive</span>
                     <h1 
                         className="text-4xl md:text-6xl font-serif mb-6"
-                        style={{ color: offersConfig.header.titleColor }}
                         dangerouslySetInnerHTML={{ __html: offersConfig.header.title }}
                     >
                     </h1>
                     <p 
                         className="font-light text-lg leading-relaxed"
-                        style={{ color: offersConfig.header.subtitleColor }}
                         dangerouslySetInnerHTML={{ __html: offersConfig.header.subtitle }}
                     >
                     </p>
@@ -371,7 +367,6 @@ export const PromotionsPage: React.FC<PromotionsPageProps> = ({ onNavigateHome, 
                             <div className="flex items-baseline gap-2">
                                 <h2 
                                     className="text-xl font-serif font-bold"
-                                    style={{ color: offersConfig.allOffersGrid?.titleColor }}
                                     dangerouslySetInnerHTML={{ __html: offersConfig.allOffersGrid?.title || "Toutes les offres" }}
                                 >
                                 </h2>

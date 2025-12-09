@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import type { Product, Category } from '../../types';
+import type { Product, Category, Brand } from '../../types';
 import { PencilIcon, TrashIcon, PlusIcon, SearchIcon } from '../IconComponents';
 import { ProductFormModal } from './ProductFormModal';
 import { api } from '../../utils/api';
@@ -11,6 +11,7 @@ interface ManageProductsPageProps {
     products: Product[];
     setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
     categories: Category[];
+    brands: Brand[];
 }
 
 const AdminProductCard: React.FC<{ product: Product; onEdit: () => void; onDelete: () => void; }> = ({ product, onEdit, onDelete }) => {
@@ -41,7 +42,7 @@ const AdminProductCard: React.FC<{ product: Product; onEdit: () => void; onDelet
     );
 };
 
-export const ManageProductsPage: React.FC<ManageProductsPageProps> = ({ products, setProducts, categories }) => {
+export const ManageProductsPage: React.FC<ManageProductsPageProps> = ({ products, setProducts, categories, brands }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -203,6 +204,7 @@ export const ManageProductsPage: React.FC<ManageProductsPageProps> = ({ products
                     }}
                     product={editingProduct}
                     categories={categories}
+                    brands={brands}
                 />
             )}
 

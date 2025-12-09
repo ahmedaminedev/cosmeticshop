@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import type { HeroSlide, ImagePromoAd, AudioPromoAd, MediumPromoAd, CollageItem, Category, Pack, ShoppableVideo } from '../../types';
 import { XMarkIcon, PlusIcon, TrashIcon } from '../IconComponents';
 import { ImageInput } from '../ImageInput';
+import { LinkBuilder } from './LinkBuilder';
 import type { AdSlot } from './ManageAdsPage';
 
 interface AdEditModalProps {
@@ -26,8 +27,7 @@ const FormField: React.FC<{ label: string; name: string; value: string | number;
     </div>
 );
 
-// ... (HeroForm, AudioPromoForm, PromoBannerForm, CollageForm remain the same) ...
-const HeroForm: React.FC<{ data: HeroSlide[], onChange: (newData: HeroSlide[]) => void }> = ({ data, onChange }) => {
+const HeroForm: React.FC<{ data: HeroSlide[], onChange: (newData: HeroSlide[]) => void, allCategories: Category[] }> = ({ data, onChange, allCategories }) => {
     const [activeSlide, setActiveSlide] = useState(0);
 
     const handleSlideChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
@@ -43,8 +43,14 @@ const HeroForm: React.FC<{ data: HeroSlide[], onChange: (newData: HeroSlide[]) =
         onChange(newSlides);
     };
 
+    const handleLinkChange = (value: string, index: number) => {
+        const newSlides = [...data];
+        newSlides[index] = { ...newSlides[index], link: value };
+        onChange(newSlides);
+    };
+
     const addSlide = () => {
-        const newSlide = { id: Date.now(), bgImage: "https://picsum.photos/id/10/1200/400", title: "Nouveau Slide", subtitle: "Description du slide", buttonText: "Découvrir" };
+        const newSlide = { id: Date.now(), bgImage: "https://picsum.photos/id/10/1200/400", title: "Nouveau Slide", subtitle: "Description du slide", buttonText: "Découvrir", link: "#" };
         onChange([...data, newSlide]);
         setActiveSlide(data.length);
     }
@@ -76,6 +82,16 @@ const HeroForm: React.FC<{ data: HeroSlide[], onChange: (newData: HeroSlide[]) =
                     <FormField label="Sous-titre" name="subtitle" value={currentSlideData.subtitle} onChange={e => handleSlideChange(e, activeSlide)} />
                     <FormField label="Texte du bouton" name="buttonText" value={currentSlideData.buttonText} onChange={e => handleSlideChange(e, activeSlide)} />
                     
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destination du bouton</label>
+                        <LinkBuilder 
+                            value={currentSlideData.link || "#"} 
+                            onChange={(url) => handleLinkChange(url, activeSlide)} 
+                            allProducts={[]} // Not needed for general links if we rely on categories
+                            allCategories={allCategories || []} 
+                        />
+                    </div>
+
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md border border-blue-200 dark:border-blue-800 mb-2">
                         <FormField label="URL Vidéo (Optionnel)" name="videoUrl" value={currentSlideData.videoUrl || ''} onChange={e => handleSlideChange(e, activeSlide)} />
                         <p className="text-xs text-gray-500 mt-1">Lien direct .mp4 (ex: Pexels). Si rempli, la vidéo sera jouée en arrière-plan.</p>
@@ -152,7 +168,7 @@ const AudioPromoForm: React.FC<{ data: AudioPromoAd[], onChange: (newData: Audio
     );
 };
 
-const CollageForm: React.FC<{ data: CollageItem[], onChange: (newData: CollageItem[]) => void }> = ({ data, onChange }) => {
+const CollageForm: React.FC<{ data: CollageItem[], onChange: (newData: CollageItem[]) => void, allCategories: Category[] }> = ({ data, onChange, allCategories }) => {
     const handleAdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target;
         const newAds = [...data];
@@ -164,6 +180,12 @@ const CollageForm: React.FC<{ data: CollageItem[], onChange: (newData: CollageIt
     const handleImageChange = (value: string, index: number) => {
         const newAds = [...data];
         newAds[index] = { ...newAds[index], imageUrl: value };
+        onChange(newAds);
+    };
+
+    const handleLinkChange = (value: string, index: number) => {
+        const newAds = [...data];
+        newAds[index] = { ...newAds[index], link: value };
         onChange(newAds);
     };
 
@@ -196,7 +218,17 @@ const CollageForm: React.FC<{ data: CollageItem[], onChange: (newData: CollageIt
                             <div className="space-y-3">
                                 <FormField label="Titre" name="title" value={ad.title || ''} onChange={e => handleAdChange(e, index)} />
                                 <FormField label="Sous-titre" name="subtitle" value={ad.subtitle || ''} onChange={e => handleAdChange(e, index)} />
-                                <FormField label="Lien (URL)" name="link" value={ad.link} onChange={e => handleAdChange(e, index)} />
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lien de destination</label>
+                                    <LinkBuilder 
+                                        value={ad.link} 
+                                        onChange={(url) => handleLinkChange(url, index)} 
+                                        allProducts={[]} 
+                                        allCategories={allCategories} 
+                                    />
+                                </div>
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Taille / Format</label>
                                     <select 
@@ -223,7 +255,6 @@ const CollageForm: React.FC<{ data: CollageItem[], onChange: (newData: CollageIt
     );
 };
 
-// --- NEW COMPONENT FOR SHOPPABLE VIDEOS ---
 const ShoppableVideosForm: React.FC<{ data: ShoppableVideo[], onChange: (newData: ShoppableVideo[]) => void }> = ({ data, onChange }) => {
     const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
         const { name, value } = e.target;
@@ -291,29 +322,19 @@ const ShoppableVideosForm: React.FC<{ data: ShoppableVideo[], onChange: (newData
     );
 };
 
-const PromoBannerForm: React.FC<{data: MediumPromoAd, onChange: (newData: MediumPromoAd) => void, allCategories: Category[], allPacks: Pack[]}> = ({ data, onChange, allCategories, allPacks }) => {
+const PromoBannerForm: React.FC<{data: MediumPromoAd, onChange: (newData: MediumPromoAd) => void, allCategories: Category[] }> = ({ data, onChange, allCategories }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         let { name, value } = e.target;
-        
-        if(name === 'linkType' && value === 'pack' && allPacks.length > 0) {
-            onChange({ ...data, linkType: 'pack', linkTarget: String(allPacks[0].id) });
-        } else if (name === 'linkType' && value === 'category' && allCategoryNames.length > 0) {
-             onChange({ ...data, linkType: 'category', linkTarget: allCategoryNames[0] });
-        } else {
-             onChange({ ...data, [name]: value });
-        }
+        onChange({ ...data, [name]: value });
     };
 
     const handleImageChange = (value: string) => {
         onChange({ ...data, image: value });
     };
-    
-    const allCategoryNames = useMemo(() => {
-         const names = allCategories.flatMap(c => 
-            [...(c.subCategories || []), ...(c.megaMenu?.flatMap(m => m.items.map(i => i.name)) || [])]
-        );
-        return [...new Set(names)].sort();
-    }, [allCategories]);
+
+    const handleLinkChange = (value: string) => {
+        onChange({ ...data, link: value });
+    };
 
     return (
         <div className="space-y-4">
@@ -321,24 +342,15 @@ const PromoBannerForm: React.FC<{data: MediumPromoAd, onChange: (newData: Medium
             <FormField label="Sous-titre" name="subtitle" value={data.subtitle} onChange={handleChange} />
             <FormField label="Texte du bouton" name="buttonText" value={data.buttonText} onChange={handleChange} />
             <ImageInput label="Image" value={data.image} onChange={handleImageChange} />
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-600">
-                 <div>
-                    <label htmlFor="linkType" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type de lien</label>
-                    <select id="linkType" name="linkType" value={data.linkType} onChange={handleChange} className="mt-1 block w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
-                        <option value="category">Catégorie</option>
-                        <option value="pack">Pack</option>
-                    </select>
-                </div>
-                 <div>
-                    <label htmlFor="linkTarget" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Cible du lien</label>
-                    <select id="linkTarget" name="linkTarget" value={data.linkTarget} onChange={handleChange} className="mt-1 block w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
-                        {data.linkType === 'category' ? (
-                            allCategoryNames.map(cat => <option key={cat} value={cat}>{cat}</option>)
-                        ) : (
-                            allPacks.map(pack => <option key={pack.id} value={pack.id}>{pack.name}</option>)
-                        )}
-                    </select>
-                </div>
+            
+            <div className="pt-4 border-t dark:border-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Lien de destination</label>
+                <LinkBuilder 
+                    value={data.link || "#"} 
+                    onChange={handleLinkChange} 
+                    allProducts={[]} 
+                    allCategories={allCategories || []} 
+                />
             </div>
         </div>
     );
@@ -365,13 +377,13 @@ export const AdEditModal: React.FC<AdEditModalProps> = ({ isOpen, onClose, onSav
 
         switch(slot.type) {
             case 'hero':
-                return <HeroForm data={formData} onChange={setFormData} />;
+                return <HeroForm data={formData} onChange={setFormData} allCategories={allCategories || []} />;
             case 'audioPromo':
                 return <AudioPromoForm data={formData} onChange={setFormData} />;
             case 'promoBanner':
-                 return <PromoBannerForm data={formData} onChange={setFormData} allCategories={allCategories!} allPacks={allPacks!} />;
+                 return <PromoBannerForm data={formData} onChange={setFormData} allCategories={allCategories!} />;
             case 'editorialCollage':
-                return <CollageForm data={formData} onChange={setFormData} />;
+                return <CollageForm data={formData} onChange={setFormData} allCategories={allCategories || []} />;
             case 'shoppableVideos':
                 return <ShoppableVideosForm data={formData} onChange={setFormData} />;
             case 'smallPromoBanners':

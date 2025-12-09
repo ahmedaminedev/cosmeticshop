@@ -55,8 +55,10 @@ export const ProductGridSection: React.FC<ProductGridSectionProps> = ({ allProdu
                 </div>
             ) : (
                 <div className="mb-10 text-center">
-                    <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-                        {config?.title || "Notre Sélection"}
+                    <h2 
+                        className="text-3xl md:text-4xl font-serif font-bold text-gray-900 dark:text-white uppercase tracking-wider"
+                        dangerouslySetInnerHTML={{ __html: config?.title || "Notre Sélection" }}
+                    >
                     </h2>
                 </div>
             )}

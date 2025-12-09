@@ -129,6 +129,12 @@ export const api = {
     // Categories
     getCategories: () => apiRequest('/categories'),
 
+    // Brands
+    getBrands: () => apiRequest('/brands'),
+    createBrand: (brand: any) => apiRequest('/brands', 'POST', brand),
+    updateBrand: (id: number, brand: any) => apiRequest(`/brands/${id}`, 'PUT', brand),
+    deleteBrand: (id: number) => apiRequest(`/brands/${id}`, 'DELETE'),
+
     // Stores
     getStores: () => apiRequest('/stores'),
 

@@ -18,7 +18,7 @@ import { ProductPreviewModal } from './components/ProductPreviewModal';
 
 // Utils & Data
 import { api } from './utils/api';
-import type { User, Product, Category, Pack, Order, CartItem, CustomerInfo, ContactMessage, Advertisements } from './types';
+import type { User, Product, Category, Pack, Order, CartItem, CustomerInfo, ContactMessage, Advertisements, Brand } from './types';
 
 // Define empty skeleton locally to avoid using constants.ts
 const emptyAdvertisements: Advertisements = {
@@ -75,6 +75,14 @@ const AppContent: React.FC = () => {
     const [selectedBlogPostSlug, setSelectedBlogPostSlug] = useState<string | null>(null);
     const [resetToken, setResetToken] = useState<string | null>(null); 
     
+    // Active Filters State (from URL)
+    const [activeFilters, setActiveFilters] = useState({
+        brand: '',
+        minPrice: '',
+        maxPrice: '',
+        promo: false
+    });
+
     // Data State
     const [user, setUser] = useState<User | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
@@ -85,13 +93,104 @@ const AppContent: React.FC = () => {
     const [adminMessages, setAdminMessages] = useState<ContactMessage[]>([]); // New state for admin messages
     const [promotionsData, setPromotionsData] = useState<any[]>([]);
     const [advertisements, setAdvertisements] = useState<Advertisements>(emptyAdvertisements);
+    const [brands, setBrands] = useState<Brand[]>([]); // Add brands state
     
     // UI State
     const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
     const { addToast } = useToast();
     const { clearCart } = useCart(); 
 
-    // Check URL for OAuth Tokens or Reset Tokens
+    // Router Logic: Handle Hash Changes for Dynamic Links
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash;
+            // Remove # and leading slash
+            const routeRaw = hash.replace(/^#\/?/, '');
+            const [path, queryString] = routeRaw.split('?');
+            const params = new URLSearchParams(queryString);
+
+            // Ignore OAuth/Reset tokens here (handled by checkUrlParams)
+            if (hash.includes('accessToken=') || hash.includes('reset-password') || hash.includes('success=') || hash.includes('error=') || params.get('payment')) {
+                return;
+            }
+
+            if (path === '' || path === 'home') {
+                setCurrentPage('home');
+                window.scrollTo(0, 0);
+            } else if (path === 'product-list') {
+                const catParam = params.get('category');
+                
+                // Extract Filters
+                const brand = params.get('brand') || '';
+                const minPrice = params.get('minPrice') || '';
+                const maxPrice = params.get('maxPrice') || '';
+                const promo = params.get('promo') === 'true';
+
+                setActiveFilters({ brand, minPrice, maxPrice, promo });
+
+                if (catParam) {
+                    setSelectedCategory(decodeURIComponent(catParam));
+                } else {
+                    setSelectedCategory('product-list');
+                }
+                setCurrentPage('product-list');
+                window.scrollTo(0, 0);
+            } else if (path.startsWith('product/')) {
+                const id = path.split('/')[1];
+                if (id) {
+                    setSelectedProductId(Number(id));
+                    setCurrentPage('product-detail');
+                    window.scrollTo(0, 0);
+                }
+            } else if (path === 'promotions') {
+                setCurrentPage('promotions');
+                window.scrollTo(0, 0);
+            } else if (path === 'packs') {
+                setCurrentPage('packs');
+                window.scrollTo(0, 0);
+            } else if (path.startsWith('pack/')) {
+                const id = path.split('/')[1] || params.get('id');
+                if (id) {
+                    setSelectedPackId(Number(id));
+                    setCurrentPage('pack-detail');
+                    window.scrollTo(0, 0);
+                }
+            } else if (path === 'blog') {
+                setCurrentPage('blog');
+                window.scrollTo(0, 0);
+            } else if (path === 'contact') {
+                setCurrentPage('contact');
+                window.scrollTo(0, 0);
+            } else if (path === 'stores') {
+                setCurrentPage('stores');
+                window.scrollTo(0, 0);
+            } else if (path === 'compare') {
+                setCurrentPage('compare');
+                window.scrollTo(0, 0);
+            } else if (path === 'favorites') {
+                setCurrentPage('favorites');
+                window.scrollTo(0, 0);
+            } else if (path === 'profile') {
+                setCurrentPage('profile');
+            } else if (path === 'order-history') {
+                setCurrentPage('order-history');
+            } else if (path === 'login') {
+                setCurrentPage('login');
+            } else if (path === 'privacy-policy') {
+                setCurrentPage('privacy-policy');
+            } else if (path === 'data-deletion') {
+                setCurrentPage('data-deletion');
+            }
+        };
+
+        window.addEventListener('hashchange', handleHashChange);
+        // Initial check on mount
+        handleHashChange();
+
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
+    // Check URL for OAuth Tokens or Reset Tokens (One-time actions)
     useEffect(() => {
         const checkUrlParams = async () => {
             const hash = window.location.hash;
@@ -139,12 +238,6 @@ const AppContent: React.FC = () => {
                 setCurrentPage('checkout'); 
                 window.history.replaceState(null, '', window.location.pathname);
             }
-            else if (hash.includes('privacy-policy')) {
-                setCurrentPage('privacy-policy');
-            }
-            else if (hash.includes('data-deletion')) {
-                setCurrentPage('data-deletion');
-            }
         };
         checkUrlParams();
     }, [user, clearCart, addToast]); 
@@ -153,18 +246,20 @@ const AppContent: React.FC = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [productsData, packsData, categoriesData, storesData, adsData] = await Promise.all([
+                const [productsData, packsData, categoriesData, storesData, adsData, brandsData] = await Promise.all([
                     api.getProducts(),
                     api.getPacks(),
                     api.getCategories(),
                     api.getStores(),
-                    api.getAdvertisements() // Use DB data exclusively
+                    api.getAdvertisements(),
+                    api.getBrands() // Load Brands
                 ]);
                 
                 setProducts(productsData);
                 setPacks(packsData);
                 setCategories(categoriesData);
                 setStores(storesData);
+                setBrands(brandsData);
                 
                 // Directly set the data from API
                 if (adsData) {
@@ -222,32 +317,33 @@ const AppContent: React.FC = () => {
     }, [user]);
 
     // --- Navigation Handlers ---
-    const navigateToHome = () => setCurrentPage('home');
-    const navigateToCategory = (category: string) => { setSelectedCategory(category); setCurrentPage('product-list'); };
-    const navigateToProductDetail = (id: number | string) => { setSelectedProductId(Number(id)); setCurrentPage('product-detail'); };
-    const navigateToPackDetail = (id: number | string) => { setSelectedPackId(Number(id)); setCurrentPage('pack-detail'); };
-    const navigateToPacks = () => setCurrentPage('packs');
-    const navigateToPromotions = () => setCurrentPage('promotions');
-    const navigateToBlog = () => setCurrentPage('blog');
-    const navigateToBlogPost = (slug: string) => { setSelectedBlogPostSlug(slug); setCurrentPage('blog-post'); };
-    const navigateToContact = () => setCurrentPage('contact');
-    const navigateToLogin = () => setCurrentPage('login');
-    const navigateToProfile = () => setCurrentPage('profile');
-    const navigateToCheckout = () => setCurrentPage('checkout');
-    const navigateToOrderHistory = () => setCurrentPage('order-history');
-    const navigateToOrderDetail = (id: string) => { setSelectedOrderId(id); setCurrentPage('order-detail'); };
-    const navigateToStores = () => setCurrentPage('stores');
-    const navigateToCompare = () => setCurrentPage('compare');
-    const navigateToFavorites = () => setCurrentPage('favorites');
-    const navigateToAdmin = () => setCurrentPage('admin');
-    const navigateToPrivacyPolicy = () => setCurrentPage('privacy-policy');
-    const navigateToDataDeletion = () => setCurrentPage('data-deletion');
+    // Note: These now mostly update the URL hash to trigger the router
+    const navigateToHome = () => window.location.hash = '#/';
+    const navigateToCategory = (category: string) => window.location.hash = `#/product-list?category=${encodeURIComponent(category)}`;
+    const navigateToProductDetail = (id: number | string) => window.location.hash = `#/product/${id}`;
+    const navigateToPackDetail = (id: number | string) => window.location.hash = `#/pack/${id}`;
+    const navigateToPacks = () => window.location.hash = '#/packs';
+    const navigateToPromotions = () => window.location.hash = '#/promotions';
+    const navigateToBlog = () => window.location.hash = '#/blog';
+    const navigateToBlogPost = (slug: string) => { setSelectedBlogPostSlug(slug); setCurrentPage('blog-post'); }; // Blog post slug routing needs more logic, keep state for now
+    const navigateToContact = () => window.location.hash = '#/contact';
+    const navigateToLogin = () => window.location.hash = '#/login';
+    const navigateToProfile = () => window.location.hash = '#/profile';
+    const navigateToCheckout = () => window.location.hash = '#/checkout';
+    const navigateToOrderHistory = () => window.location.hash = '#/order-history';
+    const navigateToOrderDetail = (id: string) => { setSelectedOrderId(id); setCurrentPage('order-detail'); }; // Keep state for modal-like details
+    const navigateToStores = () => window.location.hash = '#/stores';
+    const navigateToCompare = () => window.location.hash = '#/compare';
+    const navigateToFavorites = () => window.location.hash = '#/favorites';
+    const navigateToAdmin = () => setCurrentPage('admin'); // Admin stays protected/internal
+    const navigateToPrivacyPolicy = () => window.location.hash = '#/privacy-policy';
+    const navigateToDataDeletion = () => window.location.hash = '#/data-deletion';
 
     const handleLoginSuccess = async () => {
         try {
             const userData = await api.getMe();
             setUser(userData);
-            setCurrentPage('home');
+            navigateToHome();
             addToast(`Bienvenue ${userData.firstName} !`, "success");
         } catch (e) {
             console.error("Login data fetch error", e);
@@ -258,7 +354,7 @@ const AppContent: React.FC = () => {
         await api.logout();
         setUser(null);
         localStorage.removeItem('token');
-        setCurrentPage('login'); 
+        navigateToLogin(); 
         addToast("Vous avez été déconnecté avec succès.", "info");
     };
 
@@ -293,7 +389,7 @@ const AppContent: React.FC = () => {
             if (user) {
                 api.getMyOrders().then(setOrders);
             }
-            setCurrentPage('order-history');
+            navigateToOrderHistory();
             addToast("Commande enregistrée avec succès !", "success");
         } catch (error: any) {
             addToast(error.message || "Erreur lors de l'enregistrement de la commande.", "error");
@@ -316,6 +412,7 @@ const AppContent: React.FC = () => {
                         advertisementsData={advertisements} setAdvertisementsData={setAdvertisements}
                         promotionsData={promotionsData} setPromotionsData={setPromotionsData}
                         storesData={stores} setStoresData={setStores}
+                        brandsData={brands} setBrandsData={setBrands}
                     />
                 </Suspense>
             );
@@ -372,7 +469,7 @@ const AppContent: React.FC = () => {
                                 advertisements={advertisements}
                                 onNavigateToProductDetail={navigateToProductDetail}
                                 categories={categories}
-                                brands={[]} 
+                                brands={brands}
                             />
                         )}
                         {currentPage === 'product-list' && (
@@ -385,6 +482,7 @@ const AppContent: React.FC = () => {
                                 products={products}
                                 onNavigateToProductDetail={navigateToProductDetail}
                                 categories={categories}
+                                activeFilters={activeFilters}
                             />
                         )}
                         {currentPage === 'product-detail' && selectedProductId && (

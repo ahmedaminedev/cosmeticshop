@@ -141,11 +141,29 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPreview, on
                     </a>
                 </h3>
 
-                {/* Rating fictif pour l'esthétique */}
-                <div className="flex justify-center items-center gap-1 mb-3 opacity-60 group-hover:opacity-100 transition-opacity">
-                    {[1,2,3,4,5].map(i => (
-                        <StarIcon key={i} className="w-3 h-3 text-gold-400 fill-current" />
-                    ))}
+                {/* Rating fictif + Color Indicator */}
+                <div className="flex flex-col items-center gap-1.5 mb-3">
+                    <div className="flex justify-center items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                        {[1,2,3,4,5].map(i => (
+                            <StarIcon key={i} className="w-3 h-3 text-gold-400 fill-current" />
+                        ))}
+                    </div>
+                    {/* Indicateur de couleurs disponibles */}
+                    {product.colors && product.colors.length > 0 && (
+                        <div className="flex justify-center items-center gap-1 h-3">
+                            {product.colors.slice(0, 3).map((c, i) => (
+                                <div 
+                                    key={i} 
+                                    className="w-2.5 h-2.5 rounded-full border border-gray-200 shadow-sm"
+                                    style={{ backgroundColor: c.hex }}
+                                    title={c.name}
+                                ></div>
+                            ))}
+                            {product.colors.length > 3 && (
+                                <span className="text-[9px] text-gray-400">+{product.colors.length - 3}</span>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="mt-auto flex items-center justify-center gap-3">

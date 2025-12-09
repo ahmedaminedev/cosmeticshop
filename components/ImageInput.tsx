@@ -20,7 +20,7 @@ export const ImageInput: React.FC<ImageInputProps> = (props) => {
     const [urlInput, setUrlInput] = useState('');
     const [isCompressing, setIsCompressing] = useState(false);
 
-    // Compress Image Logic
+    // Compress Image Logic optimized for MongoDB storage
     const compressImage = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -30,7 +30,8 @@ export const ImageInput: React.FC<ImageInputProps> = (props) => {
                 img.src = event.target?.result as string;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 1200; 
+                    // Reduced max width and quality for better DB performance
+                    const MAX_WIDTH = 1000; 
                     const scaleSize = MAX_WIDTH / img.width;
                     const width = (scaleSize < 1) ? MAX_WIDTH : img.width;
                     const height = (scaleSize < 1) ? img.height * scaleSize : img.height;
@@ -41,7 +42,8 @@ export const ImageInput: React.FC<ImageInputProps> = (props) => {
                     const ctx = canvas.getContext('2d');
                     ctx?.drawImage(img, 0, 0, width, height);
                     
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    // Compress to JPEG at 0.7 quality
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
                     resolve(dataUrl);
                 };
                 img.onerror = (err) => reject(err);
@@ -107,16 +109,6 @@ export const ImageInput: React.FC<ImageInputProps> = (props) => {
 
     const removeImage = (index: number) => {
         const newImages = currentImages.filter((_, i) => i !== index);
-        emitChange(newImages);
-    };
-
-    const moveImage = (index: number, direction: 'left' | 'right') => {
-        if (direction === 'left' && index === 0) return;
-        if (direction === 'right' && index === currentImages.length - 1) return;
-        
-        const newImages = [...currentImages];
-        const targetIndex = direction === 'left' ? index - 1 : index + 1;
-        [newImages[index], newImages[targetIndex]] = [newImages[targetIndex], newImages[index]];
         emitChange(newImages);
     };
 

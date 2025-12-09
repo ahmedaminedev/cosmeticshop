@@ -8,15 +8,15 @@ interface RichTextEditorProps {
     className?: string;
 }
 
-// Couleurs dominantes de l'application (Brand Palette)
+// Exact Brand Palette
 const BRAND_COLORS = [
-    '#e11d48', // Rose 600 (Boutons Primary)
+    '#111827', // Gray 900 (Default Title)
+    '#e11d48', // Rose 600 (Primary)
     '#f43f5e', // Rose 500
-    '#111827', // Gray 900 (Titres Dark)
-    '#4b5563', // Gray 600 (Textes)
-    '#d4af37', // Gold (Luxe)
-    '#000000', // Noir
-    '#ffffff', // Blanc
+    '#d4af37', // Gold (Luxury)
+    '#4b5563', // Gray 600 (Subtitle)
+    '#ffffff', // White
+    '#000000', // Black
 ];
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, label, className }) => {
@@ -46,37 +46,37 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     };
 
     return (
-        <div className={`w-full ${className}`}>
+        <div className={`w-full ${className} mb-4`}>
             {label && <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">{label}</label>}
             
-            <div className="border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-rose-500">
+            <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm focus-within:ring-2 focus-within:ring-rose-500 transition-all">
                 {/* Toolbar */}
                 <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                    <button type="button" onClick={() => execCmd('bold')} className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 font-bold text-xs w-6 h-6 flex items-center justify-center">B</button>
-                    <button type="button" onClick={() => execCmd('italic')} className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 italic text-xs w-6 h-6 flex items-center justify-center font-serif">I</button>
-                    <button type="button" onClick={() => execCmd('underline')} className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 underline text-xs w-6 h-6 flex items-center justify-center">U</button>
+                    <button type="button" onClick={() => execCmd('bold')} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 font-bold text-xs w-7 h-7 flex items-center justify-center text-gray-700 dark:text-gray-300">B</button>
+                    <button type="button" onClick={() => execCmd('italic')} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 italic text-xs w-7 h-7 flex items-center justify-center font-serif text-gray-700 dark:text-gray-300">I</button>
+                    <button type="button" onClick={() => execCmd('underline')} className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 underline text-xs w-7 h-7 flex items-center justify-center text-gray-700 dark:text-gray-300">U</button>
                     
-                    <div className="h-4 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                    <div className="h-4 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
                     
                     {/* Brand Colors Presets */}
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                         {BRAND_COLORS.map(color => (
                             <button
                                 key={color}
                                 type="button"
                                 onClick={() => execCmd('foreColor', color)}
-                                className="w-4 h-4 rounded-full border border-gray-300 hover:scale-110 transition-transform"
+                                className="w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform shadow-sm"
                                 style={{ backgroundColor: color }}
                                 title={color}
                             />
                         ))}
                     </div>
 
-                    <div className="h-4 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                    <div className="h-4 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
 
                     {/* Custom Color Picker */}
-                    <div className="relative group cursor-pointer p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600" onClick={() => colorInputRef.current?.click()} title="Couleur personnalisée">
-                        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-500 to-blue-500 border border-gray-400"></div>
+                    <div className="relative group cursor-pointer p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onClick={() => colorInputRef.current?.click()} title="Couleur personnalisée">
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-red-500 via-green-500 to-blue-500 border border-gray-300"></div>
                         <input 
                             ref={colorInputRef}
                             type="color" 
@@ -91,7 +91,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
                     contentEditable
                     onInput={handleInput}
                     onBlur={handleInput}
-                    className="p-3 min-h-[60px] max-h-[150px] overflow-y-auto outline-none text-sm text-gray-800 dark:text-white font-sans"
+                    className="p-3 min-h-[40px] max-h-[150px] overflow-y-auto outline-none text-sm text-gray-800 dark:text-white font-sans"
                     style={{ whiteSpace: 'pre-wrap' }}
                 />
             </div>

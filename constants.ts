@@ -28,6 +28,13 @@ export const initialAdvertisements: Advertisements = {
         title: "",
         description: "",
         buttonText: "",
+        link: "#",
+        backgroundType: 'color',
+        backgroundColor: '#FFFFFF',
+        backgroundGallery: [], // Persisted user gallery
+        textColor: '#000000',
+        imageLeft: { url: "", scale: 100, top: 0, rotation: 0 },
+        imageRight: { url: "", scale: 100, top: 0, rotation: 0 }
     },
     featuredGrid: {
         title: "Nos Trésors",

@@ -38,18 +38,24 @@ export const AudioPromoBanner: React.FC<AudioPromoBannerProps> = ({ ads }) => {
                 <div className="w-full md:w-1/2 bg-white dark:bg-gray-900 flex flex-col justify-center items-center text-center p-12 z-10 relative">
                     <div key={ad.id} className="animate-fade-in-up max-w-md">
                         {/* Artistic Serif Typography */}
-                        <h3 className="font-serif italic text-3xl text-gray-500 dark:text-gray-400 mb-3 tracking-wide">
-                            {ad.subtitle1}
+                        <h3 
+                            className="font-serif italic text-3xl text-gray-500 dark:text-gray-400 mb-3 tracking-wide"
+                            dangerouslySetInnerHTML={{ __html: ad.subtitle1 }}
+                        >
                         </h3>
                         
-                        <h2 className="font-serif text-5xl md:text-6xl text-gray-900 dark:text-white mb-6 leading-tight">
-                            {ad.title}
+                        <h2 
+                            className="font-serif text-5xl md:text-6xl text-gray-900 dark:text-white mb-6 leading-tight"
+                            dangerouslySetInnerHTML={{ __html: ad.title }}
+                        >
                         </h2>
                         
                         <div className="w-16 h-px bg-gray-300 dark:bg-gray-700 mx-auto mb-8"></div>
 
-                        <p className="font-sans text-gray-600 dark:text-gray-300 mb-10 text-lg font-light tracking-wide leading-relaxed">
-                            {ad.subtitle2}
+                        <p 
+                            className="font-sans text-gray-600 dark:text-gray-300 mb-10 text-lg font-light tracking-wide leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: ad.subtitle2 }}
+                        >
                         </p>
                         
                         <button className="bg-black dark:bg-white text-white dark:text-black uppercase text-xs font-bold tracking-[0.2em] py-4 px-12 hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-300 shadow-lg transform hover:scale-105">

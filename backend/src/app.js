@@ -20,6 +20,7 @@ const contactRoutes = require('./routes/contact');
 const chatRoutes = require('./routes/chat');
 const paymentRoutes = require('./routes/payment');
 const reviewRoutes = require('./routes/reviews');
+const brandRoutes = require('./routes/brands');
 
 // Config Passport
 require('./config/passport')(passport);
@@ -71,6 +72,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/brands', brandRoutes);
 
 // --- SERVING FRONTEND IN PRODUCTION ---
 if (process.env.NODE_ENV === 'production') {

@@ -10,7 +10,8 @@ const ProductSchema = new mongoose.Schema({
   imageUrl: String, // Main thumbnail
   images: [String], // Gallery images
   discount: Number,
-  category: { type: String, required: true },
+  category: { type: String, required: true }, // This will effectively be the Sub-Category
+  parentCategory: { type: String }, // New field for Main Category
   promo: { type: Boolean, default: false },
   material: String,
   description: String,
@@ -19,6 +20,12 @@ const ProductSchema = new mongoose.Schema({
   specifications: [{
     name: String,
     value: String,
+    _id: false
+  }],
+  // Colors array
+  colors: [{
+    name: String,
+    hex: String,
     _id: false
   }],
   // New Editorial Block Structure (Why we love it)
