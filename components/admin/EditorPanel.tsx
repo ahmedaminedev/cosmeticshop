@@ -364,8 +364,6 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ section, data, onChang
         
         try {
             // Utilisation directe de process.env.API_KEY
-            // Grâce au `define` de Vite, cette valeur sera remplacée par la chaîne réelle lors du build.
-            // Cela évite l'erreur "process is not defined" dans le navigateur.
             const apiKey = process.env.API_KEY;
             
             if (!apiKey) {
@@ -379,31 +377,98 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ section, data, onChang
             // Clean HTML tags from context if any
             const cleanContext = contextText.replace(/<[^>]*>?/gm, '');
             
-            const prompt = `Generate a modern, minimalist, luxury style SVG icon code representing: "${cleanContext}". 
-            Style requirements: Thin strokes (stroke-width="1.5" or "1"), elegant curves, fine line art. 
-            Color: Black (currentColor). Transparent background. 
-            Output strictly valid SVG code only, starting with <svg and ending with </svg>. 
-            Do NOT include markdown blocks like \`\`\`xml or \`\`\`. Do not include comments.`;
+            // PROMPT OPTIMISÉ POUR STYLE LUXE & COULEUR FORCE
+            const prompt = `You are a high-end UI designer. Create a vector SVG icon representing: "${cleanContext}".
+            
+            CRITICAL SPECS:
+            1.  **COLOR**: The stroke MUST be exactly #f43f5e. NO BLACK.
+            2.  **STYLE**: Minimalist, fine line art, luxury aesthetic. Thin strokes (1.5px).
+            3.  **FILL**: Transparent (fill="none").
+            4.  **SHAPE**: Use simple geometric shapes (circle, path, rect). Avoid complex details.
+            5.  **OUTPUT**: Raw <svg> string only. viewBox="0 0 24 24".
+            
+            Example output format:
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="..." />
+            </svg>`;
 
+            console.log("Generating icon for:", cleanContext);
+
+            // Use gemini-2.5-flash for speed and reliability, combined with strong post-processing
             const response = await ai.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents: prompt,
             });
             let svgCode = response.text ? response.text.trim() : '';
+            console.log("Raw AI Response:", svgCode);
             
-            // Cleanup any potential markdown wrapper just in case
-            svgCode = svgCode.replace(/^```(xml|svg)?/i, '').replace(/```$/, '').trim();
+            // Cleanup markdown
+            svgCode = svgCode.replace(/```(?:xml|svg)?/gi, '').replace(/```/g, '').trim();
 
-            if (svgCode.startsWith('<svg')) {
+            // Extract SVG part if embedded in text
+            const svgMatch = svgCode.match(/<svg[\s\S]*?<\/svg>/i);
+            
+            if (svgMatch) {
+                svgCode = svgMatch[0];
+                
+                // --- ROBUST SVG POST-PROCESSING ---
+                // We parse the SVG to DOM, force attributes, and re-serialize to ensure "Luxury" style 
+                // regardless of what the AI generated.
+                try {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(svgCode, "image/svg+xml");
+                    const svgElement = doc.querySelector("svg");
+
+                    if (svgElement) {
+                        // Force standard attributes
+                        svgElement.setAttribute("width", "100%");
+                        svgElement.setAttribute("height", "100%");
+                        svgElement.setAttribute("viewBox", "0 0 24 24");
+                        svgElement.setAttribute("fill", "none");
+                        // Force ROSE color on root
+                        svgElement.setAttribute("stroke", "#f43f5e");
+                        svgElement.setAttribute("stroke-width", "1.5");
+                        svgElement.setAttribute("stroke-linecap", "round");
+                        svgElement.setAttribute("stroke-linejoin", "round");
+
+                        // Clean up child elements (paths, circles, etc.)
+                        const elements = svgElement.querySelectorAll("*");
+                        elements.forEach(el => {
+                            // Remove conflicting fills
+                            const fill = el.getAttribute("fill");
+                            if (fill && fill !== "none") {
+                                el.setAttribute("fill", "none");
+                            }
+                            
+                            // Remove conflicting strokes or force them to rose/current
+                            // Ideally we let them inherit from root, or force them
+                            el.removeAttribute("stroke"); // Inherit from root
+                            
+                            // Remove hardcoded black
+                            const style = el.getAttribute("style");
+                            if (style) {
+                                // Simple cleanup of style strings
+                                el.setAttribute("style", style.replace(/fill:\s*[^;]+;?/gi, "").replace(/stroke:\s*[^;]+;?/gi, ""));
+                            }
+                        });
+
+                        const serializer = new XMLSerializer();
+                        svgCode = serializer.serializeToString(svgElement);
+                    }
+                } catch (e) {
+                    console.warn("SVG Post-processing failed, using raw AI output.", e);
+                }
+                
                 // Convert SVG to Data URI
                 const dataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgCode)))}`;
                 handleArrayItemChange(index, 'iconUrl', dataUrl);
             } else {
-                console.error("AI did not return valid SVG code");
+                console.error("AI did not return valid SVG code.");
+                alert("L'IA n'a pas pu générer un code SVG valide.");
             }
         } catch (error) {
             console.error("Icon generation failed:", error);
-            alert("Erreur lors de la génération de l'icône.");
+            alert("Erreur lors de la génération de l'icône. Vérifiez la console.");
         } finally {
             setGeneratingIcon(null);
         }

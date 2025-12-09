@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [react()],
   define: {
     // Injection sécurisée de la clé API pour le client @google/genai
-    'process.env.API_KEY': JSON.stringify(process.env.API_KEY || "AIzaSyCgn7okk7Jt3qkr08w4FmIl2QGqEB-tZAc")
+    // Nous utilisons JSON.stringify pour que la valeur soit traitée comme une chaîne de caractères dans le code client
+    'process.env.API_KEY': JSON.stringify("AIzaSyCgn7okk7Jt3qkr08w4FmIl2QGqEB-tZAc")
   },
   server: {
     host: true, // Listen on all addresses
